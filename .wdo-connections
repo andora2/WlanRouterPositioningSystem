@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<connections:connections xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:connections="http://www.ibm.com/websphere/wdo/connections">
+  <connection id="DB2ExpressC">
+    <development xsi:type="connections:rsc-live-connection" id="DB2ExpressC_dev" name="DB2ExpressC"/>
+    <runtime xsi:type="connections:datasource-connection" auto-deploy="true" class-location="I:\EigeneDateien\Datenbanken\DB2ExpressC\java\db2jcc4.jar;I:\EigeneDateien\Datenbanken\DB2ExpressC\java\db2jcc_license_cu.jar" id="DB2ExpressC_runtime" classname="com.ibm.db2.jcc.DB2ConnectionPoolDataSource" database-name="SAMPLE" jndi-name="jdbc/DB2ExpressC" port-number="50000" resource-reference-name="DB2ExpressC" server-name="localhost" sql-vendor-type="43" userid="Adrian"/>
+  </connection>
+</connections:connections>

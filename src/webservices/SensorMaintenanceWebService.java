@@ -28,12 +28,6 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.HttpClientBuilder;
-
 import com.ibm.websphere.jaxrs20.multipart.IAttachment;
 import com.ibm.websphere.jaxrs20.multipart.IMultipartBody;
 
@@ -43,7 +37,7 @@ import com.ibm.websphere.jaxrs20.multipart.IMultipartBody;
 @Produces( MediaType.APPLICATION_JSON )
 @Consumes(MediaType.APPLICATION_JSON)
 @Stateless
-public class MainWebService {
+public class SensorMaintenanceWebService {
 	
 	@GET
 	@Path( "/add_sensor/{id}" )
@@ -164,30 +158,4 @@ public class MainWebService {
 		}
         return Response.ok("").build();
     }	
-	
-	
-	@GET
-	@Path("/rssi/avg/{sessionid}/{sensorid}")
-    public Response getRssiAvg(@PathParam("sessionid") int sessionid, @PathParam("sensorid") int sensorid ) {
-		HttpClient client = HttpClientBuilder.create().build();
-        HttpGet request = new HttpGet("https://192.168.0.122/rssi");
-
-        try {
-            HttpResponse response = client.execute(request);
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                try (InputStream stream = entity.getContent()) {
-                    BufferedReader reader =
-                            new BufferedReader(new InputStreamReader(stream));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        System.out.println(line);
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }		
-        return Response.ok("").build();
-	}
 }
