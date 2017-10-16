@@ -11,8 +11,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
 import javax.ejb.Stateless;
@@ -24,6 +29,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -157,14 +163,15 @@ public class MainWebService {
     public Response getImageByFileName(@PathParam("filename") String filename) {
 		File repositoryFile = new File(filename);
         try {
-			return Response.ok(new FileInputStream(repositoryFile)).build();
+        	final CacheControl cacheControl = new CacheControl();
+            cacheControl.setMaxAge((int) TimeUnit.MINUTES.toSeconds(1)); 
+            return Response.ok(new FileInputStream(repositoryFile)).cacheControl(cacheControl).build();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
         return Response.ok("").build();
     }	
-	
 	
 	@GET
 	@Path("/rssi/avg/{sessionid}/{sensorid}")

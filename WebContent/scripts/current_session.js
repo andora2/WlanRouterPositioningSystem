@@ -1,14 +1,61 @@
-var g_heatmap;
+var g_latestUploadedFile;
 var g_sensorList = [];
 var g_refreshHeatMapInterval;
-var g_REFRESH_RATE_MS = 1000;
+var g_REFRESH_RATE_MS = 400;
 
 window.onload = function() {
+	loadCurrentSessionTpl();
 	g_heatmap = initHeatMap();
 	initSensors();
 	g_refreshHeatMapInterval = startHeatMapAutoRefresh(g_REFRESH_RATE_MS);
-	console.log(navigator.connection);
 };
+
+
+
+function loadCurrentSessionTpl(){
+	var data = {
+		sensor_chart_list: [
+			{ id: 1,
+			  name: "Sofa",
+			  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+			  timestamp: "2017-03-11 10:10:11",
+		      signal_dbm: -70,
+		      signal_quality_pct: 50,
+			},
+			{ id: 2,
+				  name: "Schlafzimmer",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -60,
+			      signal_quality_pct: 70,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+		]	
+	};
+	
+	$.ajax({
+	    url : "current_session.tpl.html",
+	    type : "get",
+	    async: false,
+	    success : function(template) {
+		    var rendered = Mustache.render(template, data);
+		    $('#target').html(rendered);
+	    },
+	    error: function() {
+	       connectionError();
+	    }
+	 });	
+	/*$.get('current_session.tpl.html', function(template) {
+	    var rendered = Mustache.render(template, data);
+	    $('#target').html(rendered);
+	  });*/	
+}
 
 function initSensors(){
 	addSensor(  1, //i_id 
@@ -19,13 +66,13 @@ function initSensors(){
 				50 //y
 			);
 	
-	/*addSensor(  2, //i_id 
+	addSensor(  2, //i_id 
 			"192.168.0.121", //i_ip 
 			"Second Sesnor", //i_name
 			"No description yet eather", //i_description
 			100, //x
 			200 //y
-		);*/
+		);
 }
 
 function addSensor(i_id, i_ip, i_name, i_description, i_x, i_y){
@@ -153,6 +200,11 @@ function refreshWifiSignalValueAsync(i_sensor){
 	    	i_sensor.heatmapData.wifiSignal_dbm.value = chopValueOnMinMaxBorder(  i_sensor.heatmapData.wifiSignal_dbm.min, 
 	    																		  i_sensor.heatmapData.wifiSignal_dbm.max,
 	    																		  newVal );
+	    	
+	    	var quality =  ((newVal - i_sensor.heatmapData.wifiSignal_dbm.min) / (i_sensor.heatmapData.wifiSignal_dbm.max - i_sensor.heatmapData.wifiSignal_dbm.min))*100;
+	    	$('#sensor_chart_'+ i_sensor.id).asPieProgress("go", quality);
+	    	$('#sensor_chart_dbm_'+ i_sensor.id).text( newVal );
+
 	     },
 		
 		error: function(){
