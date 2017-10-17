@@ -2,15 +2,55 @@ var g_latestUploadedFile;
 var g_sensorList = [];
 var g_refreshHeatMapInterval;
 var g_REFRESH_RATE_MS = 400;
+var g_selectedSensor = {
+			sensor_idx:0,
+			sensor_chart_dbm_id: "" //"sensor_chart_dbm_"
+		};
 
 window.onload = function() {
 	loadCurrentSessionTpl();
 	g_heatmap = initHeatMap();
 	initSensors();
 	g_refreshHeatMapInterval = startHeatMapAutoRefresh(g_REFRESH_RATE_MS);
+	registerSensorPosOnGroundPlan();
+	registerSensorSelection();
 };
 
+function registerSensorPosOnGroundPlan(){
+	$("#heatmapContainer").dblclick(function(event){ 
+		var parentOffset = $(this).parent().offset(); 
+		var relX = event.pageX - parentOffset.left;
+		var relY = event.pageY - parentOffset.top;
+	    
+	    g_sensorList[0].heatmapData.x = relX;
+	    g_sensorList[0].heatmapData.y = relY;
 
+	    /*jQuery("<div>").addClass("node")
+	                   .css({position: "absolute",
+	                         left:     x,
+	                         top:      y })
+	                   .click(showOptions)
+	                   .appendTo("body");*/
+
+	});	
+}
+
+function registerSensorSelection(){
+	$("div").click(function(event){
+		var sensorChartIdStart = "sensor_chart_dbm_";
+		var targetId = event.target.id;
+		if( !(event.target.id === undefined || event.target.id === null) && event.target.id.startsWith(sensorChartIdStart)){
+			if( g_selectedSensor.sensor_chart_dbm_id.length > 0 ){
+				$("#"+g_selectedSensor.sensor_chart_dbm_id).attr("style", "");
+			}
+			var sensorId = event.target.id.slice(sensorChartIdStart.length -1); //getSensorIDX by id
+			$("#"+event.target.id).attr("style", "border: 2px solid black");
+			g_selectedSensor.sensor_chart_dbm_id = event.target.id;
+			g_selectedSensor.sensor_idx = parseInt(sensorId) - 1; //TODO getSensorIDX by id
+
+		} 
+	});	
+}
 
 function loadCurrentSessionTpl(){
 	var data = {
@@ -85,9 +125,9 @@ function addSensor(i_id, i_ip, i_name, i_description, i_x, i_y){
 			x: i_x,
 			y: i_y,
 			wifiSignal_dbm: {
-				min: -90,
-				max: -50,
-				value: -90
+				min: -85,
+				max: -55,
+				value: -85
 			},
 			pingSpeed_ms: {
 				min: 0,
@@ -203,7 +243,7 @@ function refreshWifiSignalValueAsync(i_sensor){
 	    	
 	    	var quality =  ((newVal - i_sensor.heatmapData.wifiSignal_dbm.min) / (i_sensor.heatmapData.wifiSignal_dbm.max - i_sensor.heatmapData.wifiSignal_dbm.min))*100;
 	    	$('#sensor_chart_'+ i_sensor.id).asPieProgress("go", quality);
-	    	$('#sensor_chart_dbm_'+ i_sensor.id).text( newVal );
+	    	$('#sensor_chart_dbm_'+ i_sensor.id).text( newVal + ' dbm' );
 
 	     },
 		
