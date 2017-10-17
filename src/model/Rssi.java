@@ -14,24 +14,18 @@ import java.sql.Timestamp;
 public class Rssi implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@Id 
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	@Id
 	private int id;
 
 	private int rssi;
 
 	private Timestamp savedtime;
 
-	//bi-directional many-to-one association to Planingsession
-	@ManyToOne
-	@JoinColumn(name="PLANINGSESSIONID", referencedColumnName="ID")
-	private Planingsession planingsession;
-
 	//bi-directional many-to-one association to Sensor
 	@ManyToOne
 	@JoinColumns({
-		@JoinColumn(name="SENSORMACID", referencedColumnName="MACID"),
-		@JoinColumn(name="PLANINGSESSIONID", referencedColumnName="PLANINGSESSIONID")
+		@JoinColumn(name="PLANINGSESSIONID", referencedColumnName="PLANINGSESSIONID"),
+		@JoinColumn(name="SENSORMACID", referencedColumnName="ID")
 		})
 	private Sensor sensor;
 
@@ -60,14 +54,6 @@ public class Rssi implements Serializable {
 
 	public void setSavedtime(Timestamp savedtime) {
 		this.savedtime = savedtime;
-	}
-
-	public Planingsession getPlaningsession() {
-		return this.planingsession;
-	}
-
-	public void setPlaningsession(Planingsession planingsession) {
-		this.planingsession = planingsession;
 	}
 
 	public Sensor getSensor() {

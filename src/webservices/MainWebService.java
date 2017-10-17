@@ -172,6 +172,24 @@ public class MainWebService {
 		}
         return Response.ok("").build();
     }	
+
+	@GET
+	@Path("/image_names")
+    public Response getImageNames() {
+        File tempFile = new File("test");
+        String s = tempFile.getAbsolutePath();
+        try {
+			String s1 = tempFile.getCanonicalPath();
+			String sx = s1;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        String s2 = tempFile.getParent();
+        String s3 = tempFile.getPath();
+        return Response.ok(s).build();
+    }	
+	
 	
 	@GET
 	@Path("/rssi/avg/{sessionid}/{sensorid}")
