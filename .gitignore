@@ -1,3 +1,7 @@
 /build/
 /.project
 /target/
+/.classpath
+/.wdo-connections
+/login.properties
+/.settings/
