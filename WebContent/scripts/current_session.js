@@ -3,7 +3,7 @@ var g_sensorList = [];
 var g_refreshHeatMapInterval;
 var g_REFRESH_RATE_MS = 400;
 var g_selectedSensor = {
-			sensor_idx:0,
+			sensor_id:0,
 			sensor_chart_dbm_id: "" //"sensor_chart_dbm_"
 		};
 
@@ -18,20 +18,16 @@ window.onload = function() {
 
 function registerSensorPosOnGroundPlan(){
 	$("#heatmapContainer").dblclick(function(event){ 
-		var parentOffset = $(this).parent().offset(); 
-		var relX = event.pageX - parentOffset.left;
-		var relY = event.pageY - parentOffset.top;
-	    
-	    g_sensorList[0].heatmapData.x = relX;
-	    g_sensorList[0].heatmapData.y = relY;
-
-	    /*jQuery("<div>").addClass("node")
-	                   .css({position: "absolute",
-	                         left:     x,
-	                         top:      y })
-	                   .click(showOptions)
-	                   .appendTo("body");*/
-
+		if( g_selectedSensor.sensor_chart_dbm_id.length > 0 ){
+			var parentOffset = $(this).parent().offset(); 
+			var relX = event.pageX - parentOffset.left;
+			var relY = event.pageY - parentOffset.top;
+			var sensor = getSensorFromGlobalListById(g_selectedSensor.sensor_id);
+			if( sensor != null ){
+				sensor.heatmapData.x = Math.trunc(relX);
+				sensor.heatmapData.y = Math.trunc(relY);
+			}
+		}
 	});	
 }
 
@@ -43,13 +39,21 @@ function registerSensorSelection(){
 			if( g_selectedSensor.sensor_chart_dbm_id.length > 0 ){
 				$("#"+g_selectedSensor.sensor_chart_dbm_id).attr("style", "");
 			}
-			var sensorId = event.target.id.slice(sensorChartIdStart.length -1); //getSensorIDX by id
 			$("#"+event.target.id).attr("style", "border: 2px solid black");
+			
+			var sensorId = event.target.id.slice(sensorChartIdStart.length); //getSensorIDX by id
 			g_selectedSensor.sensor_chart_dbm_id = event.target.id;
-			g_selectedSensor.sensor_idx = parseInt(sensorId) - 1; //TODO getSensorIDX by id
-
+			g_selectedSensor.sensor_id = parseInt(sensorId);
 		} 
 	});	
+}
+
+function getSensorFromGlobalListById(i_sensor_id){
+	var result = g_sensorList.filter(function( obj ) {
+		  return obj.id == i_sensor_id;
+		});
+	
+	return result.length > 0? result[0]: null;
 }
 
 function loadCurrentSessionTpl(){
