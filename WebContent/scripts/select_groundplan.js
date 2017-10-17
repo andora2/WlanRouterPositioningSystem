@@ -56,8 +56,21 @@ function loadSelectGroundPlanTpl(){
 		]	
 	};
 	
-	$.get('select_ground_plan.tpl.html', function(template) {
+	$.ajax({
+	    url : "select_ground_plan.tpl.html",
+	    type : "get",
+	    async: false,
+	    success : function(template) {
+		    var rendered = Mustache.render(template, data);
+		    $('#target').html(rendered);
+	    },
+	    error: function() {
+	       connectionError();
+	    }
+	 });	
+	
+	/*$.get('select_ground_plan.tpl.html', function(template) {
 	    var rendered = Mustache.render(template, data);
 	    $('#target').html(rendered);
-	  });	
+	  });	*/
 }

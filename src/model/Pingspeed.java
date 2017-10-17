@@ -13,9 +13,8 @@ import java.sql.Timestamp;
 @NamedQuery(name="Pingspeed.findAll", query="SELECT p FROM Pingspeed p")
 public class Pingspeed implements Serializable {
 	private static final long serialVersionUID = 1L;
-
-	@Id 
-	@GeneratedValue(strategy=GenerationType.AUTO)
+	
+	@Id
 	private int id;
 
 	private int responsemstime;
@@ -24,16 +23,11 @@ public class Pingspeed implements Serializable {
 
 	private int usedpacketbytesize;
 
-	//bi-directional many-to-one association to Planingsession
-	@ManyToOne
-	@JoinColumn(name="PLANINGSESSIONID", referencedColumnName="ID")
-	private Planingsession planingsession;
-
 	//bi-directional many-to-one association to Sensor
 	@ManyToOne
 	@JoinColumns({
-		@JoinColumn(name="SENSORMACID", referencedColumnName="MACID"),
-		@JoinColumn(name="PLANINGSESSIONID", referencedColumnName="PLANINGSESSIONID")
+		@JoinColumn(name="PLANINGSESSIONID", referencedColumnName="PLANINGSESSIONID"),
+		@JoinColumn(name="SENSORMACID", referencedColumnName="ID")
 		})
 	private Sensor sensor;
 
@@ -70,14 +64,6 @@ public class Pingspeed implements Serializable {
 
 	public void setUsedpacketbytesize(int usedpacketbytesize) {
 		this.usedpacketbytesize = usedpacketbytesize;
-	}
-
-	public Planingsession getPlaningsession() {
-		return this.planingsession;
-	}
-
-	public void setPlaningsession(Planingsession planingsession) {
-		this.planingsession = planingsession;
 	}
 
 	public Sensor getSensor() {
