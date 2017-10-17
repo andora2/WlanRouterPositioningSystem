@@ -1,15 +1,27 @@
 package webservices;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
 import javax.ejb.Stateless;
+import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -17,12 +29,20 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.HttpClientBuilder;
+
 import com.ibm.websphere.jaxrs20.multipart.IAttachment;
 import com.ibm.websphere.jaxrs20.multipart.IMultipartBody;
+
 
 
 @Path( "main" )
@@ -70,23 +90,28 @@ public class MainWebService {
 	                  continue;
 	              }
 	              DataHandler dataHandler = attachment.getDataHandler();
+
 	              try {
 					stream = dataHandler.getInputStream();
-				} catch (IOException e1) {
+				  } catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
-				}
+				  }
+	              
 	              MultivaluedMap<String, String> map = attachment.getHeaders();
 	              String fileName = null;
 	              String formElementName = null;
 	              String[] contentDisposition = map.getFirst("Content-Disposition").split(";");
 	              for (String tempName : contentDisposition) {
 	                  String[] names = tempName.split("=");
-	                  formElementName = names[1].trim().replaceAll("\"", "");
-	                  if ((tempName.trim().startsWith("filename"))) {
-	                      fileName = formElementName;
+	                  if( names.length > 1){
+		                  formElementName = names[1].trim().replaceAll("\"", "");
+		                  if ((tempName.trim().startsWith("filename"))) {
+		                      fileName = formElementName;
+		                  }
 	                  }
 	              }
+	              
 	              if (fileName == null) {
 	                  StringBuffer sb = new StringBuffer();
 	                  BufferedReader br = new BufferedReader(new InputStreamReader(stream));
@@ -109,9 +134,16 @@ public class MainWebService {
 	                  formElementValue = sb.toString();
 	                  System.out.println(formElementName + ":" + formElementValue);
 	              } else {
-	               //handle the file as you want
 	               File tempFile = new File(fileName);
-	              }
+	               try {
+	            	
+					Files.copy(stream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+				   } catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				   }
+	               System.out.println("Saved File to:" + tempFile.toPath());
+	             }
 	         }
 	         if (stream != null) {
 	             try {
@@ -121,6 +153,48 @@ public class MainWebService {
 					e.printStackTrace();
 				}
 	         }
-	         return Response.ok("test").build();
+	         return Response.ok().build();
+	}
+	
+	
+	@GET
+	@Path("/image/{filename}")
+	@Produces( "image/jpg" )
+    public Response getImageByFileName(@PathParam("filename") String filename) {
+		File repositoryFile = new File(filename);
+        try {
+        	final CacheControl cacheControl = new CacheControl();
+            cacheControl.setMaxAge((int) TimeUnit.MINUTES.toSeconds(1)); 
+            return Response.ok(new FileInputStream(repositoryFile)).cacheControl(cacheControl).build();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        return Response.ok("").build();
+    }	
+	
+	@GET
+	@Path("/rssi/avg/{sessionid}/{sensorid}")
+    public Response getRssiAvg(@PathParam("sessionid") int sessionid, @PathParam("sensorid") int sensorid ) {
+		HttpClient client = HttpClientBuilder.create().build();
+        HttpGet request = new HttpGet("https://192.168.0.122/rssi");
+
+        try {
+            HttpResponse response = client.execute(request);
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                try (InputStream stream = entity.getContent()) {
+                    BufferedReader reader =
+                            new BufferedReader(new InputStreamReader(stream));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        System.out.println(line);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }		
+        return Response.ok("").build();
 	}
 }

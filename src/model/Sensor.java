@@ -14,14 +14,16 @@ import java.util.List;
 public class Sensor implements Serializable {
 	private static final long serialVersionUID = 1L;
 
-	@Id
-	private String macid;
+	@Id 
+	@GeneratedValue(strategy=GenerationType.AUTO)
+    private int id;
 
 	private double geolat;
 
 	private double geolon;
 
-	private String lastipaddress;
+
+	private String ipaddress;
 
 	private String locationname;
 
@@ -33,23 +35,20 @@ public class Sensor implements Serializable {
 
 	private String name;
 
-	//bi-directional many-to-one association to Rssi
-	@OneToMany(mappedBy="sensor")
-	private List<Rssi> rssis;
-
 	//bi-directional many-to-one association to Pingspeed
 	@OneToMany(mappedBy="sensor")
 	private List<Pingspeed> pingspeeds;
 
+	//bi-directional many-to-one association to Rssi
+	@OneToMany(mappedBy="sensor")
+	private List<Rssi> rssis;
+
+	//bi-directional many-to-one association to Planingsession
+	@ManyToOne
+	@JoinColumn(name="PLANINGSESSIONID", referencedColumnName="ID")
+	private Planingsession planingsession;
+
 	public Sensor() {
-	}
-
-	public String getMacid() {
-		return this.macid;
-	}
-
-	public void setMacid(String macid) {
-		this.macid = macid;
 	}
 
 	public double getGeolat() {
@@ -68,12 +67,20 @@ public class Sensor implements Serializable {
 		this.geolon = geolon;
 	}
 
-	public String getLastipaddress() {
-		return this.lastipaddress;
+	public int getId() {
+		return this.id;
 	}
 
-	public void setLastipaddress(String lastipaddress) {
-		this.lastipaddress = lastipaddress;
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public String getIpaddress() {
+		return this.ipaddress;
+	}
+
+	public void setIpaddress(String ipaddress) {
+		this.ipaddress = ipaddress;
 	}
 
 	public String getLocationname() {
@@ -116,6 +123,28 @@ public class Sensor implements Serializable {
 		this.name = name;
 	}
 
+	public List<Pingspeed> getPingspeeds() {
+		return this.pingspeeds;
+	}
+
+	public void setPingspeeds(List<Pingspeed> pingspeeds) {
+		this.pingspeeds = pingspeeds;
+	}
+
+	public Pingspeed addPingspeed(Pingspeed pingspeed) {
+		getPingspeeds().add(pingspeed);
+		pingspeed.setSensor(this);
+
+		return pingspeed;
+	}
+
+	public Pingspeed removePingspeed(Pingspeed pingspeed) {
+		getPingspeeds().remove(pingspeed);
+		pingspeed.setSensor(null);
+
+		return pingspeed;
+	}
+
 	public List<Rssi> getRssis() {
 		return this.rssis;
 	}
@@ -138,26 +167,12 @@ public class Sensor implements Serializable {
 		return rssi;
 	}
 
-	public List<Pingspeed> getPingspeeds() {
-		return this.pingspeeds;
+	public Planingsession getPlaningsession() {
+		return this.planingsession;
 	}
 
-	public void setPingspeeds(List<Pingspeed> pingspeeds) {
-		this.pingspeeds = pingspeeds;
-	}
-
-	public Pingspeed addPingspeed(Pingspeed pingspeed) {
-		getPingspeeds().add(pingspeed);
-		pingspeed.setSensor(this);
-
-		return pingspeed;
-	}
-
-	public Pingspeed removePingspeed(Pingspeed pingspeed) {
-		getPingspeeds().remove(pingspeed);
-		pingspeed.setSensor(null);
-
-		return pingspeed;
+	public void setPlaningsession(Planingsession planingsession) {
+		this.planingsession = planingsession;
 	}
 
 }

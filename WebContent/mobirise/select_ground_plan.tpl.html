@@ -1,0 +1,118 @@
+<section class="menu cid-qycCRYZEdv" once="menu" id="menu1-13" data-rv-view="1762">
+
+    
+
+    <nav class="navbar navbar-expand beta-menu navbar-dropdown align-items-center navbar-fixed-top navbar-toggleable-sm bg-color transparent">
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </button>
+        <div class="menu-logo">
+            <div class="navbar-brand">
+                <span class="navbar-logo">
+                    <a href="WlanHeatMapManager">
+                         <img src="assets/images/logo2.png" alt="Wifi Router Positioning System" title="Wifi Router Positioning System" media-simple="true" style="height: 4rem;">
+                    </a>
+                </span>
+                <span class="navbar-caption-wrap"><a class="navbar-caption text-white display-4" href="index.html#header2-f">
+                        Wlan Router Positioning System</a></span>
+            </div>
+        </div>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav nav-dropdown nav-right" data-app-modern-menu="true"><li class="nav-item">
+                    <a class="nav-link link text-white display-4" href="session manager.html#header3-1d"><span class="mbrib-growing-chart mbr-iconfont mbr-iconfont-btn"></span>
+                        
+                        Sessions&nbsp;</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link link text-white display-4" href="ground_plan_manager.html#header13-18"><span class="mbrib-home mbr-iconfont mbr-iconfont-btn"></span>
+                        
+                        GroundPlans</a>
+                </li><li class="nav-item"><a class="nav-link link text-white display-4" href="sensor_manager.html#progress-bars3-1b"><span class="socicon socicon-rss mbr-iconfont mbr-iconfont-btn"></span>Wifi Beacons</a></li></ul>
+            
+        </div>
+    </nav>
+</section>
+
+<section class="engine"><a href="https://mobirise.co/d">free web page software</a></section><section class="header13 cid-qycwooMLzI mbr-parallax-background" id="header13-y" data-rv-view="1756">
+
+    <div class="container">
+        
+
+        <h1 class="mbr-section-title align-center pb-3 mbr-white mbr-bold mbr-fonts-style display-1">
+            Upload GroundPlan</h1>
+
+        
+
+        <div class="container mt-5 pt-5 pb-5">
+            <div class="media-container-column" data-form-type="formoid">
+                
+
+                <form id="upload_groundplan_data" class="form-inline" method="POST" enctype="multipart/form-data">
+                    
+                    <div class="form-group">
+                        <input type="text" class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="Name" placeholder="Name" id="name-header13-y">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" class="form-control input-sm input-inverse" name="description" required="yes" data-form-field="Description" placeholder="Description, Address" id="description-header13-y">
+                    </div>
+                    <div class="form-group">
+                       	<input type="file" class="form-control input-sm input-inverse"  required="yes" name="file" data-form-field="File" placeholder="File" id="file-header13-y">
+                    </div>
+                    <div class="buttons-wrap">
+                        <button class="btn btn-primary display-4" type="submit" role="button">UPLOAD</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+</section>
+
+<section class="features18 popup-btn-cards cid-qycv48MoJz" id="features18-x" data-rv-view="1759">
+    <div class="container">
+        <h2 class="mbr-section-title pb-3 align-center mbr-fonts-style display-2">GroundPlan Archive</h2>
+        <h3 class="mbr-section-subtitle display-5 align-center mbr-fonts-style mbr-light">
+            select an existing groundplan</h3>
+        <div class="media-container-row pt-5 ">
+
+{{#ground_plan_list}}
+            <div class="card p-3 col-12 col-md-6 col-lg-4">
+                <div class="card-wrapper ">
+                    <div class="card-img">
+                        <div class="mbr-overlay"></div>
+                        <div class="mbr-section-btn text-center"><a href="current_session.html#progress-bars3-12?ground_plan_id={{id}}" class="btn btn-primary display-4">
+                                SELECT</a></div>
+                        <img src="../rest/main/image/{{filename}}" alt="{{name}}" media-simple="true">
+                    </div>
+                    <div class="card-box">
+                        <h4 class="card-title mbr-fonts-style display-7">{{name}}</h4>
+                        <p class="mbr-text mbr-fonts-style align-left display-7">
+                            {{description}}<br>Uplaoded: {{upload_date}}</p>
+                    </div>
+                </div>
+            </div>
+{{/ground_plan_list}}
+
+        </div>
+    </div>
+</section>
+
+  <script src="assets/web/assets/jquery/jquery.min.js"></script>
+  <script src="assets/popper/popper.min.js"></script>
+  <script src="assets/tether/tether.min.js"></script>
+  <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+  <script src="assets/vimeo_player/vimeo_player.js"></script>
+  <script src="assets/viewport-checker/jquery.viewportchecker.js"></script>
+  <script src="assets/dropdown/js/script.min.js"></script>
+  <script src="assets/touch-swipe/jquery.touch-swipe.min.js"></script>
+  <script src="assets/smooth-scroll/smooth-scroll.js"></script>
+  <script src="assets/jarallax/jarallax.min.js"></script>
+  <script src="assets/theme/js/script.js"></script>
+
+<div id="scrollToTop" class="scrollToTop mbr-arrow-up"><a style="text-align: center;"><i class="mbri-down mbr-iconfont"></i></a></div>
+<input name="animation" type="hidden">
