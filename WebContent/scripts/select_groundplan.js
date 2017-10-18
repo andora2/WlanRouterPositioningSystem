@@ -14,7 +14,7 @@ function initGroundPlanUploadHandler(){
         var formData = new FormData(this);
 
         $.ajax({
-            url: "../rest/main/upload_image",
+            url: "../rest/groundplan/add",
             type: 'POST',
             data: formData,
             async: false,

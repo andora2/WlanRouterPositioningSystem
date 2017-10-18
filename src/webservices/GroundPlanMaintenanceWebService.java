@@ -44,7 +44,7 @@ import repository.GroundPlanRepositories;
 public class GroundPlanMaintenanceWebService extends BaseWebServices {
 	
 	final static String  FORMFIELD_DESCRIPTION = "description";
-	final static String  FORMFIELD_FILE = "filename";
+	final static String  FORMFIELD_FILE = "file";
 	final static String  FORMFIELD_NAME = "name";
 	
 	@Inject
@@ -57,7 +57,10 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 	public Response add(IMultipartBody multipartBody) {
 		Groundplanimage newGroundPlan = new Groundplanimage();
 		newGroundPlan.setDescription( getDescriptionFormFieldValue(multipartBody) );
-		newGroundPlan.setFilename( getGroundPlanFileName(multipartBody) ); //The Name given by the user shall be the filename used to save the file on the server
+		String uploadedFileName = getFileNameFromFileFormFieldByFieldName( multipartBody, FORMFIELD_FILE );
+		String[] uploadedFileNameParts = uploadedFileName.split("\\."); 
+		String uploadedFileNameExtension = uploadedFileNameParts.length > 0? uploadedFileNameParts[uploadedFileNameParts.length-1]: "";
+		newGroundPlan.setFilename( getGroundPlanFileName(multipartBody, uploadedFileNameExtension) ); //The Name given by the user shall be the filename used to save the file on the server
 		saveFormDataStreamToFile( getFormDataFieldValues(multipartBody, FORMFIELD_FILE).get(0), 
 								  newGroundPlan.getFilename());
 		repo.persist(newGroundPlan);
@@ -67,11 +70,10 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 	}
 
 
-	private String getGroundPlanFileName(IMultipartBody multipartBody) {
+	private String getGroundPlanFileName(IMultipartBody multipartBody, String uploadedFileNameExtension) {
 		String fileName = getNameFormFieldValue(multipartBody);
 		fileName = convertFreeTextToValidFileName(fileName);
-		String extension = getFileExtensionOfFileFormField(multipartBody);
-		return !extension.isEmpty()? fileName + "." + extension: fileName; 
+		return !uploadedFileNameExtension.isEmpty()? fileName + "." + uploadedFileNameExtension: fileName; 
   	}
 
 

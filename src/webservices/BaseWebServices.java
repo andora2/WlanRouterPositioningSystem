@@ -221,7 +221,7 @@ public class BaseWebServices {
         for (String tempName : contentDisposition) {
             String[] names = tempName.split("=");
             if( names.length > 1){
-                if ((tempName.trim().startsWith(fieldName))) {
+                if ((tempName.trim().startsWith("name")) && names[1].substring(1, names[1].length()-1).matches(fieldName)) {
                     return true;
                 }
             }
@@ -233,9 +233,8 @@ public class BaseWebServices {
 		IAttachment formElementAttachement = multipartBody.getAllAttachments().stream()
 				.filter(attachment -> isFormDataAttachmentOfFieldName(attachment, fieldName) ).findAny().orElse(null);
 		return formElementAttachement != null? getFormElemenNameByFomFieldName( formElementAttachement, fieldName ): "";
-		
-		
 	}	
+
 	private String getFormElemenNameByFomFieldName(IAttachment attachment, String fieldName) {
         MultivaluedMap<String, String> map = attachment.getHeaders();
         String formElementName = null;
@@ -243,9 +242,34 @@ public class BaseWebServices {
         for (String tempName : contentDisposition) {
             String[] names = tempName.split("=");
             if( names.length > 1){
-                formElementName = names[1].trim().replaceAll("\"", "");
-                if ((tempName.trim().startsWith(fieldName))) {
+                formElementName = names[1].trim().substring(1, names[1].length()-1);
+                if ((tempName.trim().startsWith("name")) && formElementName.matches(fieldName)) {
                     return formElementName;
+                }
+            }
+        }		
+        return "";
+	}
+
+	protected String getFileNameFromFileFormFieldByFieldName(IMultipartBody multipartBody, String fieldName) {
+		IAttachment formElementAttachement = multipartBody.getAllAttachments().stream()
+				.filter(attachment -> isFormDataAttachmentOfFieldName(attachment, fieldName) ).findAny().orElse(null);
+		return formElementAttachement != null? getFileNameFromFileFormFieldByFieldName( formElementAttachement, fieldName ): "";
+	}	
+	
+	private String getFileNameFromFileFormFieldByFieldName(IAttachment attachment, String fieldName) {
+        MultivaluedMap<String, String> map = attachment.getHeaders();
+        String dispElemValue = null;
+        String[] contentDisposition = map.getFirst("Content-Disposition").split(";");
+        boolean isSearchdFieldName = false;
+        for (String dispElem : contentDisposition) {
+            String[] dispElemParts = dispElem.split("=");
+            if( dispElemParts.length > 1){
+                dispElemValue = dispElemParts[1].trim().substring(1, dispElemParts[1].length()-1);
+                if ((dispElem.trim().startsWith("name")) && dispElemValue.matches(fieldName)) {
+                	isSearchdFieldName = true;
+                } else if( dispElem.trim().startsWith("filename") && isSearchdFieldName) {
+                	return dispElemValue;
                 }
             }
         }		
