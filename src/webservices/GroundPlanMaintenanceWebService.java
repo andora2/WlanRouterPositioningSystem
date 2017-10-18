@@ -50,6 +50,13 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 	@Inject
 	GroundPlanRepositories repo;
 	
+	@GET
+	@Path( "/all" )
+	public Response getSesnors() {
+		return Response.ok(repo.getAllGroundPlans()).build();
+	}
+	
+	
 	@POST
 	@Path( "/add" )
 	@Consumes("multipart/form-data")
@@ -103,13 +110,4 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 	}
 	
 		
-	@GET
-	@Path( "/sensors" )
-	@Produces( MediaType.APPLICATION_JSON )
-	public Response getSesnors() {
-		return Response.ok().build();
-	}
-	
-	
-
 }
