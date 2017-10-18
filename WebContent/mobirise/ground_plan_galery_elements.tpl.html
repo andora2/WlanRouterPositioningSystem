@@ -1,0 +1,26 @@
+    <div class="container">
+        <h2 class="mbr-section-title pb-3 align-center mbr-fonts-style display-2">GroundPlan Archive</h2>
+        <h3 class="mbr-section-subtitle display-5 align-center mbr-fonts-style mbr-light">
+            select an existing groundplan</h3>
+        <div class="media-container-row pt-5 ">
+
+{{#ground_plan_list}}
+            <div class="card p-3 col-12 col-md-6 col-lg-4">
+                <div class="card-wrapper ">
+                    <div class="card-img">
+                        <div class="mbr-overlay"></div>
+                        <div class="mbr-section-btn text-center"><a href="current_session.html#progress-bars3-12?ground_plan_id={{id}}" class="btn btn-primary display-4">
+                                SELECT</a></div>
+                        <img src="../rest/main/image/{{filename}}" alt="{{name}}" media-simple="true">
+                    </div>
+                    <div class="card-box">
+                        <h4 class="card-title mbr-fonts-style display-7">{{name}}</h4>
+                        <p class="mbr-text mbr-fonts-style align-left display-7">
+                            {{description}}<br>Uplaoded: {{upload_date}}</p>
+                    </div>
+                </div>
+            </div>
+{{/ground_plan_list}}
+
+        </div>
+    </div>

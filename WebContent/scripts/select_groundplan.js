@@ -19,8 +19,24 @@ function initGroundPlanUploadHandler(){
             data: formData,
             async: false,
             success: function (data) {
-            	g_latestUploadedFile = formData; 
-            	window.open("select_groundplan.html#features18-x");
+            	g_latestUploadedFile = formData;
+            	$("#features18-x").empty();
+            	loadGroundPlans();
+            	$('html, body').animate({
+                    scrollTop: $("#features18-x").offset().top
+                }, 2000);
+            },
+            error: function (data) {
+            	$('#myErrorModal').on('shown.bs.modal', function () {
+            		  $('#myErrorModalMessage').focus()
+            	})
+            	$('#myErrorModalMessage').text(data.responseText);
+            	$('#myErrorModal').modal({
+            	  backdrop: true,
+				  keyboard: true,
+				  focus: true,
+				  show: true
+				});
             },
             cache: false,
             contentType: false,
@@ -73,4 +89,13 @@ function loadSelectGroundPlanTpl(){
 	    var rendered = Mustache.render(template, data);
 	    $('#target').html(rendered);
 	  });	*/
+}
+
+function loadGroundPlans(){
+	$.get('../rest/groundplan/all', function(data) {
+		$.get('select_ground_plan.tpl.html', function(template) {
+		    var rendered = Mustache.render(template, data);
+		    $('#target').html(rendered);
+		  });
+	});
 }

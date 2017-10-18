@@ -18,12 +18,14 @@ public class Groundplanimage implements Serializable {
 	@Id
 	private String filename;
 
+	private String name;
+	
 	private String description;
 
 	private Timestamp savedtime;
 
 	//bi-directional many-to-one association to Planingsession
-	@OneToMany(mappedBy="groundplanimage")
+	@OneToMany(mappedBy="groundplanimage", fetch=FetchType.LAZY)
 	private List<Planingsession> planingsessions;
 
 	public Groundplanimage() {
@@ -73,6 +75,14 @@ public class Groundplanimage implements Serializable {
 		planingsession.setGroundplanimage(null);
 
 		return planingsession;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 }

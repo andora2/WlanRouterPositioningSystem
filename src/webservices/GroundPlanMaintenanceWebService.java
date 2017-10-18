@@ -11,13 +11,17 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Iterator;
 import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.net.ssl.SSLEngineResult.Status;
+import javax.persistence.PersistenceException;
 import javax.servlet.ServletContext;
+import javax.validation.ConstraintViolationException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -63,23 +67,36 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 	@Produces("multipart/form-data")
 	public Response add(IMultipartBody multipartBody) {
 		Groundplanimage newGroundPlan = new Groundplanimage();
+		newGroundPlan.setName( getNameFormFieldValue(multipartBody) );
 		newGroundPlan.setDescription( getDescriptionFormFieldValue(multipartBody) );
 		String uploadedFileName = getFileNameFromFileFormFieldByFieldName( multipartBody, FORMFIELD_FILE );
 		String[] uploadedFileNameParts = uploadedFileName.split("\\."); 
 		String uploadedFileNameExtension = uploadedFileNameParts.length > 0? uploadedFileNameParts[uploadedFileNameParts.length-1]: "";
-		newGroundPlan.setFilename( getGroundPlanFileName(multipartBody, uploadedFileNameExtension) ); //The Name given by the user shall be the filename used to save the file on the server
+		newGroundPlan.setFilename( getGroundPlanFileName(newGroundPlan.getName(), uploadedFileNameExtension) ); //The Name given by the user shall be the filename used to save the file on the server
 		saveFormDataStreamToFile( getFormDataFieldValues(multipartBody, FORMFIELD_FILE).get(0), 
 								  newGroundPlan.getFilename());
-		repo.persist(newGroundPlan);
 		
-		return Response.ok(newGroundPlan.getFilename()).build();
-		//return Response.serverError().build();
+		try{
+			repo.persist(newGroundPlan);
+			return Response.ok(newGroundPlan.getFilename()).build();
+		} catch (  PersistenceException e){
+			Throwable cause = e.getCause();
+		    while (cause != null) {
+		        if (cause instanceof SQLIntegrityConstraintViolationException) {
+		        	return Response.status(Response.Status.BAD_REQUEST).entity("GroundPlan with Name: '" + newGroundPlan.getName() + "' already exists").build();
+		        }
+		        cause = cause.getCause();
+		    }			
+		} catch ( Exception e ) {
+			return Response.status(Response.Status.BAD_REQUEST).entity("Unhandled exception. GroundPlan couldn't be added!").build();
+		}
+	
+		return Response.serverError().entity("Unhandled exception. GroundPlan couldn't be added!").build();
 	}
 
 
-	private String getGroundPlanFileName(IMultipartBody multipartBody, String uploadedFileNameExtension) {
-		String fileName = getNameFormFieldValue(multipartBody);
-		fileName = convertFreeTextToValidFileName(fileName);
+	private String getGroundPlanFileName(String newGroundPlanName, String uploadedFileNameExtension) {
+		String fileName = convertFreeTextToValidFileName(newGroundPlanName);
 		return !uploadedFileNameExtension.isEmpty()? fileName + "." + uploadedFileNameExtension: fileName; 
   	}
 

@@ -1,5 +1,7 @@
 package repository;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 import javax.enterprise.context.Dependent;
@@ -20,7 +22,9 @@ public class GroundPlanRepositories {
 	
 	public void persist(Groundplanimage newGroundPlan ){
 		//entityManager.getTransaction().begin();
+		newGroundPlan.setSavedtime(new Timestamp((new Date()).getTime()) );
 		entityManager.persist(newGroundPlan);
+		entityManager.flush();
 		//entityManager.getTransaction().commit();
 	}
 	
