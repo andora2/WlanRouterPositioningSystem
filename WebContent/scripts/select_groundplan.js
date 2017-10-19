@@ -25,6 +25,7 @@ function initGroundPlanUploadHandler(){
             	$('html, body').animate({
                     scrollTop: $("#features18-x").offset().top
                 }, 2000);
+            	$('form#upload_groundplan_data').trigger("reset");
             },
             error: function (data) {
             	ajaxError(data)
@@ -94,13 +95,29 @@ function loadSelectGroundPlanTpl(){
 }
 
 function loadGroundPlans(){
-	$.get('../rest/groundplan/all', function(resultGroundPlanList) {
-		$.get('ground_plan_galery_elements.tpl.html', function(template) {
-	    	var data = { ground_plan_list: resultGroundPlanList }
-		    var rendered = Mustache.render(template, data);
-		    $('#target').html(rendered);
-		  });
-	});
+	$.ajax({
+	    url : "../rest/groundplan/all",
+	    type : "get",
+	    async: false,
+	    success : function(resultGroundPlanList) {
+				$.ajax({
+				    url : "ground_plan_galery_elements.tpl.html",
+				    type : "get",
+				    async: false,
+				    success : function(template) {
+				    	var data = { ground_plan_list: resultGroundPlanList }
+					    var rendered = Mustache.render(template, data);
+					    $('#features18-x').html(rendered);
+				    },
+				    error: function(data) {
+				       ajaxError();
+				    }
+				 });	
+		    },
+		    error: function(data) {
+		       ajaxError();
+		    }
+		 });		
 }
 
 function ajaxError(data){

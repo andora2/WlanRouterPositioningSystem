@@ -7,13 +7,52 @@ var g_selectedSensor = {
 			sensor_chart_dbm_id: "" //"sensor_chart_dbm_"
 		};
 
+var g_selectedGroundPlanId;
+
 window.onload = function() {
 	loadCurrentSessionTpl();
+	g_selectedGroundPlanId = getUrlParameter("ground_plan_id");
+	if( !( g_selectedGroundPlanId === undefined ) ){
+		$.ajax({
+		    url : "../rest/groundplan/get/" + g_selectedGroundPlanId,
+		    type : "get",
+		    async: false,
+		    success : function(groundPlan) {
+				$("#select_ground_plan_img").attr("src", "../rest/main/image/" + groundPlan.filename);
+				$("#current_ground_plan_img").attr("src", "../rest/main/image/" + groundPlan.filename);
+            	$('html, body').animate({
+                    scrollTop: $("#progress-bars3-12").offset().top
+                }, 2000);
+
+		    },
+		    error: function() {
+		    	console.log("Failed to request the selected ground plan!(URL = '../rest/groundplan/get/" + g_selectedGroundPlanId +"'");
+		    }
+		 });	
+	}
 	g_heatmap = initHeatMap();
 	initSensors();
 	g_refreshHeatMapInterval = startHeatMapAutoRefresh(g_REFRESH_RATE_MS);
 	registerSensorPosOnGroundPlan();
 	registerSensorSelection();
+	
+};
+
+var getUrlParameter = function getUrlParameter(sParam) {
+	var location = window.location;
+	var urlElem = location.search.substring(1);
+    var sPageURL = decodeURIComponent( urlElem ); 
+    var sURLVariables = sPageURL.split('&');
+    var sParameterName;
+    var i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? undefined : sParameterName[1];
+        }
+    }
 };
 
 function registerSensorPosOnGroundPlan(){
@@ -80,6 +119,84 @@ function loadCurrentSessionTpl(){
 			      signal_dbm: -20,
 			      signal_quality_pct: 90,
 			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			{ id: 3,
+				  name: "Küche",
+				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
+				  timestamp: "2017-03-11 10:10:11",
+			      signal_dbm: -20,
+			      signal_quality_pct: 90,
+			},
+			
 		]	
 	};
 	
@@ -261,4 +378,5 @@ function refreshWifiSignalValueAsync(i_sensor){
 function chopValueOnMinMaxBorder(i_min, i_max, i_value){
 	return i_value < i_min? i_min: i_value > i_max? i_max: i_value;
 }
+
 

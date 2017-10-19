@@ -16,7 +16,7 @@ public class GroundPlanRepositories {
 	@Inject
     private EntityManager entityManager;
 
-	public List<Groundplanimage> getAllGroundPlans(){
+	public List<Groundplanimage> getAll(){
 		return entityManager.createNamedQuery("Groundplanimage.findAll").getResultList();
 	}
 	
@@ -28,5 +28,13 @@ public class GroundPlanRepositories {
 		//entityManager.getTransaction().commit();
 	}
 	
+	public void detach(Groundplanimage groundPlan){
+		entityManager.detach(groundPlan);		
+	}
 	
+	public Groundplanimage get(int id){
+		return entityManager.createNamedQuery("Groundplanimage.get", Groundplanimage.class)
+				.setParameter("id", id)
+				.getSingleResult();
+	}
 }

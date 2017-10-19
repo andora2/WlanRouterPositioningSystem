@@ -40,8 +40,8 @@
 
     <div class="container">
         <div class="media-container-row">
-            <div class="mbr-figure" style="width: 110%;">
-                <img src="assets/images/01.jpg" alt="Mobirise" media-simple="true">
+            <div class="mbr-figure" style="width: 60%;">
+                <img id="select_ground_plan_img" src="assets/images/SelectGroundPlanImage.jpg" alt="Select your GroundPlan" media-simple="true">
             </div>
 
             <div class="media-content">
@@ -64,6 +64,7 @@
         <h3 class="mbr-section-subtitle mbr-fonts-style display-5">Name and Add the Beacons to the Ground Plan below</h3>
     
         <div id="sensor_chart_list" class="media-container-row pt-5 mt-2">
+        <div class="card-columns">
 {{#sensor_chart_list}}
             <div class="card p-3 align-center">
                 <div class="wrap">
@@ -71,13 +72,14 @@
                        	<p class="pie_progress__number mbr-fonts-style display-5" ></p>
                     </div>
                 </div> 
-                <div class="mbr-crt-title pt-3">
-                    <h4 class="card-title py-2 mbr-fonts-style display-5">
+                <div >
+                    <h3 class="card-title py-2 mbr-fonts-style display-5">
                         {{name}}<div id="sensor_chart_dbm_{{id}}">{{signal_dbm}}</div>
-                    </h4>
+                    </h3>
                 </div>                 
             </div>
 {{/sensor_chart_list}}
+        </div>
         </div>
 	</div>
 </section>
@@ -86,9 +88,9 @@
 
     <figure class="mbr-figure container">
 		
-		<div id="heatmapContainerWrapper" class="image-block" style="width: 72%;">
+		<div id="heatmapContainerWrapper" class="image-block" style="width: 50%;">
 		    <div id="heatmapContainer">
-                <img src="../rest/main/image/IMG_3547.JPG" width="1400" alt="GrundRiss"  media-simple="true">
+                <img id="current_ground_plan_img" src="../rest/main/image/IMG_3547.JPG" width="1400" alt="GrundRiss"  media-simple="true">
 		    </div>
 	    </div>
     </figure>

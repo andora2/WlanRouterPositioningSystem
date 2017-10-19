@@ -2,6 +2,10 @@ package model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.annotate.JsonTypeIdResolver;
+
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -11,10 +15,16 @@ import java.util.List;
  * 
  */
 @Entity
-@NamedQuery(name="Groundplanimage.findAll", query="SELECT g FROM Groundplanimage g")
+@NamedQueries(value = { 	
+		@NamedQuery(name="Groundplanimage.findAll", query="SELECT g FROM Groundplanimage g ORDER BY g.id DESC"),
+		@NamedQuery(name="Groundplanimage.get", query="SELECT g FROM Groundplanimage g WHERE g.id = :id")
+})
 public class Groundplanimage implements Serializable {
 	private static final long serialVersionUID = 1L;
 
+	@Column(name = "ID", nullable = false, updatable = false, insertable = false)
+	private int id;
+	
 	@Id
 	private String filename;
 
@@ -28,6 +38,14 @@ public class Groundplanimage implements Serializable {
 	@OneToMany(mappedBy="groundplanimage", fetch=FetchType.LAZY)
 	private List<Planingsession> planingsessions;
 
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+	
 	public Groundplanimage() {
 	}
 
@@ -55,7 +73,8 @@ public class Groundplanimage implements Serializable {
 		this.savedtime = savedtime;
 	}
 
-	public List<Planingsession> getPlaningsessions() {
+	@JsonIgnore
+	/*public List<Planingsession> getPlaningsessions() {
 		return this.planingsessions;
 	}
 
@@ -75,7 +94,7 @@ public class Groundplanimage implements Serializable {
 		planingsession.setGroundplanimage(null);
 
 		return planingsession;
-	}
+	}*/
 
 	public void setName(String name) {
 		this.name = name;

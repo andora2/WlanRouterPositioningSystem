@@ -1,5 +1,8 @@
 package webservices;
 
+import java.awt.AlphaComposite;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,6 +20,7 @@ import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.ejb.Stateless;
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.net.ssl.SSLEngineResult.Status;
 import javax.persistence.PersistenceException;
@@ -56,10 +60,15 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 	
 	@GET
 	@Path( "/all" )
-	public Response getSesnors() {
-		return Response.ok(repo.getAllGroundPlans()).build();
+	public Response getAll() {
+		return Response.ok(repo.getAll()).build();
 	}
 	
+	@GET
+	@Path( "/get/{id}" )
+	public Response get(@PathParam("id") int id) {
+		return Response.ok(repo.get(id)).build();
+	}
 	
 	@POST
 	@Path( "/add" )
@@ -73,11 +82,20 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 		String[] uploadedFileNameParts = uploadedFileName.split("\\."); 
 		String uploadedFileNameExtension = uploadedFileNameParts.length > 0? uploadedFileNameParts[uploadedFileNameParts.length-1]: "";
 		newGroundPlan.setFilename( getGroundPlanFileName(newGroundPlan.getName(), uploadedFileNameExtension) ); //The Name given by the user shall be the filename used to save the file on the server
-		saveFormDataStreamToFile( getFormDataFieldValues(multipartBody, FORMFIELD_FILE).get(0), 
-								  newGroundPlan.getFilename());
+		InputStream fileStream = getFormDataFieldValues(multipartBody, FORMFIELD_FILE).get(0);
+		saveFormDataStreamToFile( fileStream, newGroundPlan.getFilename());
+		/*try {
+			BufferedImage img = createResizedCopy(ImageIO.read(fileStream), 50, 50, false);
+			ImageIO.write(img, uploadedFileNameExtension, new File( getGroundPlanFileName(newGroundPlan.getName(), "thmb."+uploadedFileNameExtension)) );
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+			saveFormDataStreamToFile( fileStream, getGroundPlanFileName(newGroundPlan.getName(), "thmb."+uploadedFileNameExtension));
+		}*/
 		
 		try{
 			repo.persist(newGroundPlan);
+			
 			return Response.ok(newGroundPlan.getFilename()).build();
 		} catch (  PersistenceException e){
 			Throwable cause = e.getCause();
@@ -126,5 +144,20 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 		return getFormDataValueFromFieldStream( getFormDataFieldValues(multipartBody, FORMFIELD_DESCRIPTION).get(0) );
 	}
 	
+	BufferedImage createResizedCopy(Image originalImage, 
+            int scaledWidth, int scaledHeight, 
+            boolean preserveAlpha)
+    {
+        System.out.println("resizing...");
+        int imageType = preserveAlpha ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
+        BufferedImage scaledBI = new BufferedImage(scaledWidth, scaledHeight, imageType);
+        Graphics2D g = scaledBI.createGraphics();
+        if (preserveAlpha) {
+            g.setComposite(AlphaComposite.Src);
+        }
+        g.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null); 
+        g.dispose();
+        return scaledBI;
+    }	
 		
 }
