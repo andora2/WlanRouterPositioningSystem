@@ -27,16 +27,7 @@ function initGroundPlanUploadHandler(){
                 }, 2000);
             },
             error: function (data) {
-            	$('#myErrorModal').on('shown.bs.modal', function () {
-            		  $('#myErrorModalMessage').focus()
-            	})
-            	$('#myErrorModalMessage').text(data.responseText);
-            	$('#myErrorModal').modal({
-            	  backdrop: true,
-				  keyboard: true,
-				  focus: true,
-				  show: true
-				});
+            	ajaxError(data)
             },
             cache: false,
             contentType: false,
@@ -49,7 +40,7 @@ function initGroundPlanUploadHandler(){
 
 
 function loadSelectGroundPlanTpl(){
-	var data = {
+/*	var data = {
 		ground_plan_list: [
 			{ id: 1,
 			  filename: "IMG_1983.JPG",
@@ -70,20 +61,31 @@ function loadSelectGroundPlanTpl(){
 			  upload_date: "2017-12-11"
 			}
 		]	
-	};
+	};*/
 	
 	$.ajax({
-	    url : "select_ground_plan.tpl.html",
+	    url : "../rest/groundplan/all",
 	    type : "get",
 	    async: false,
-	    success : function(template) {
-		    var rendered = Mustache.render(template, data);
-		    $('#target').html(rendered);
-	    },
-	    error: function() {
-	       connectionError();
-	    }
-	 });	
+	    success : function(resultGroundPlanList) {
+				$.ajax({
+				    url : "select_ground_plan.tpl.html",
+				    type : "get",
+				    async: false,
+				    success : function(template) {
+				    	var data = { ground_plan_list: resultGroundPlanList }
+					    var rendered = Mustache.render(template, data);
+					    $('#target').html(rendered);
+				    },
+				    error: function(data) {
+				       ajaxError();
+				    }
+				 });	
+		    },
+		    error: function(data) {
+		       ajaxError();
+		    }
+		 });	
 	
 	/*$.get('select_ground_plan.tpl.html', function(template) {
 	    var rendered = Mustache.render(template, data);
@@ -92,10 +94,24 @@ function loadSelectGroundPlanTpl(){
 }
 
 function loadGroundPlans(){
-	$.get('../rest/groundplan/all', function(data) {
-		$.get('select_ground_plan.tpl.html', function(template) {
+	$.get('../rest/groundplan/all', function(resultGroundPlanList) {
+		$.get('ground_plan_galery_elements.tpl.html', function(template) {
+	    	var data = { ground_plan_list: resultGroundPlanList }
 		    var rendered = Mustache.render(template, data);
 		    $('#target').html(rendered);
 		  });
+	});
+}
+
+function ajaxError(data){
+	$('#myErrorModal').on('shown.bs.modal', function () {
+		  $('#myErrorModalMessage').focus()
+	})
+	$('#myErrorModalMessage').text(data.responseText);
+	$('#myErrorModal').modal({
+	  backdrop: true,
+	  keyboard: true,
+	  focus: true,
+	  show: true
 	});
 }
