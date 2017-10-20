@@ -33,10 +33,31 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
 
-//const char *ssid = "Gast_bei_Uns";
-//const char *password = "musafiri";
-const char *ssid = "MasterOfDisaster";
-const char *password = "AVIYrJNBj5CXmP1Mt";
+#include <Wire.h>
+#include <Servo.h>
+#include <stdint.h>
+
+const char *ssid = "WifiApPosSysSrv";
+const char *password = "E892m76>";
+//const char *ssid = "MasterOfDisaster";
+//const char *password = "AVIYrJNBj5CXmP1Mt";
+
+#define EOL        '\n'
+#define EOCMD     ';'
+#define CMD_NAME_DELIM  ':'
+#define PARAM_DELIM   ','
+#define DEFAULT_DELAY    50
+#define MAX_LENGTH_SERIAL_LINE 125 //longest expected cmd DELTA_XY x 5 => 25chars x 5 = 125chars  
+
+#define SET_WIFI_SSID_CMD  "SET_WIFISSID" // sets the wifi ssid
+#define SET_WIFI_PWD_CMD  "SET_WIFIPWD" // sets the wifi pwd
+#define WIFI_CONNECT "WIFI_CONNECT" // sets the wifi pwd
+#define IS_CONNECTED "IS_CONNECTED" // sets the wifi pwd
+#define GET_IP "GET_IP" // sets the wifi pwd
+
+bool fullPrint = true;
+bool fullStop = false;
+char g_LATEST_CHAR_FROM_SERIAL = 0;
 
 ESP8266WebServer server ( 80 );
 
@@ -101,29 +122,12 @@ void setup ( void ) {
 	pinMode ( led, OUTPUT );
 	digitalWrite ( led, 0 );
 	Serial.begin ( 115200 );
-	WiFi.begin ( ssid, password );
-	Serial.println ( "" );
 
-	// Wait for connection
-	while ( WiFi.status() != WL_CONNECTED ) {
-		delay ( 500 );
-		Serial.print ( "." );
-	}
+  initWifi(ssid, password);
 
-  for (int rssi_idx = 0; rssi_idx < MAX_RSSI_VALUES; rssi_idx++) {
-    rssi[rssi_idx] = (-1 * WiFi.RSSI());//(((-1 * WiFi.RSSI()) % 100)*3)%140;
-    delay ( 50 );
+  if ( MDNS.begin ( "esp8266" ) ) {
+    Serial.println ( "MDNS responder started" );
   }
-
-	Serial.println ( "" );
-	Serial.print ( "Connected to " );
-	Serial.println ( ssid );
-	Serial.print ( "IP address: " );
-	Serial.println ( WiFi.localIP() );
-
-	if ( MDNS.begin ( "esp8266" ) ) {
-		Serial.println ( "MDNS responder started" );
-	}
 
 	server.on ( "/", handleRoot );
   server.on ( "/avg_rssi", restGetAvgRSSI );
@@ -139,6 +143,53 @@ void setup ( void ) {
 	server.onNotFound ( handleNotFound );
 	server.begin();
 	Serial.println ( "HTTP server started" );
+}
+
+void initWifi(const char* i_ssid, const char* i_pwd){
+  Serial.print ( "Disconnecting Wifi if connected." );
+  if ( WiFi.status() == WL_CONNECTED ) {
+    WiFi.disconnect();
+  }
+  while ( WiFi.status() == WL_CONNECTED ) {
+    delay ( 500 );
+    Serial.print ( "." );
+  }
+
+  Serial.println ( "" );
+  Serial.print ( "Trying to connect to: " );
+  Serial.println ( i_ssid );
+  WiFi.begin ( i_ssid, i_pwd );
+  Serial.println ( "" );
+
+  // Wait for connection
+  int count = 0;
+  while ( WiFi.status() != WL_CONNECTED ) {
+    delay ( 500 );
+    Serial.print ( "." );
+    count++;
+    if(count%64 == 0){ //try to reconect afer 8 sec
+      Serial.print ( "Maybe failed to connect!" );
+      break;
+/*      WiFi.begin ( i_ssid, i_pwd );
+      Serial.println ( "" );
+      Serial.print ( "Trying to reconnect connect to: " );
+      Serial.println ( i_ssid );
+      WiFi.begin ( i_ssid, i_pwd );
+*/
+    }
+  }
+
+  for (int rssi_idx = 0; rssi_idx < MAX_RSSI_VALUES; rssi_idx++) {
+    rssi[rssi_idx] = (-1 * WiFi.RSSI());//(((-1 * WiFi.RSSI()) % 100)*3)%140;
+    delay ( 50 );
+  }
+
+  Serial.println ( "" );
+  Serial.print ( "Connected to " );
+  Serial.println ( i_ssid );
+  Serial.print ( "IP address: " );
+  Serial.println ( WiFi.localIP() );
+
 }
 
 bool rssi_saved = false;
@@ -217,3 +268,194 @@ void drawGraph() {
 
 	server.send ( 200, "image/svg+xml", out);
 }
+
+
+bool isEOLDelimiter(char i_nDelim){
+  return i_nDelim == EOL;
+}
+
+bool isEOCmdDelimiter(char i_nDelim){
+  return i_nDelim == EOCMD;
+}
+
+bool isEOCmdNameDelimiter(char i_nDelim){
+  return i_nDelim == CMD_NAME_DELIM;
+}
+
+bool isParamDelimiter(char i_nDelim){
+  return i_nDelim == PARAM_DELIM;
+}
+
+bool isEOParam(char i_nDelim){
+  return isEOCmdDelimiter(i_nDelim) || isEOLine(i_nDelim) || isParamDelimiter(i_nDelim);
+}
+
+bool isEOCmdName(char i_nDelim){
+  return isEOCmdDelimiter(i_nDelim) || isEOLine(i_nDelim) || isEOCmdNameDelimiter(i_nDelim);
+}
+
+bool isEOLine(char i_nDelim){
+  return isEOLDelimiter(i_nDelim);
+}
+
+bool isEOCmd(char i_nDelim){
+  return isEOCmdDelimiter(i_nDelim);
+}
+
+String readSerialCommandLine(){
+  String strCmdLine = "";
+  while (Serial.available() ){   //avoid buffer overflow
+      strCmdLine = Serial.readStringUntil(EOL);
+  } 
+  
+  strCmdLine.trim();
+  if (strCmdLine.length() > 0){
+    Serial.print(F("Received LINE input from serial: '")); Serial.print(strCmdLine); Serial.print("' -> ");Serial.println(strCmdLine.length()); 
+  }
+
+  return isEOCmdName(strCmdLine.charAt(strCmdLine.length()-1)) ? strCmdLine : "";
+}
+
+String readSerialCommandLine_bloed(){
+  String strCmdLine = "";
+  char inChar = 0;
+  while (Serial.available() && //stop reading if there nothing left to read
+       !isEOLine(inChar) &&     //detect End Of Line
+       strCmdLine.length() <= MAX_LENGTH_SERIAL_LINE ){   //avoid buffer overflow
+      inChar = (char)Serial.read();
+      strCmdLine += inChar;
+  } 
+  
+  strCmdLine.trim();
+  if (strCmdLine.length() > 0){
+    Serial.print(F("Received LINE input from serial: '")); Serial.print(strCmdLine); Serial.print("' -> ");Serial.println(strCmdLine.length()); 
+  }
+
+  return isEOCmdName(inChar) ? strCmdLine : "";
+}
+
+bool doesCmdNameContainDelimiters(String i_strCmdName){
+  return (i_strCmdName.indexOf(EOL) > -1) ||
+    (i_strCmdName.indexOf(EOCMD) > -1) ||
+    (i_strCmdName.indexOf(PARAM_DELIM) > -1) ||
+    (i_strCmdName.indexOf(CMD_NAME_DELIM) > -1);
+}
+
+int getFirstValidCmdNameDelimIdx(String& ir_strCmdLine){
+  int idxCmdNameDelim = ir_strCmdLine.indexOf(CMD_NAME_DELIM);
+  int idxEOCmd = ir_strCmdLine.indexOf(EOCMD);
+  int idxEOL = ir_strCmdLine.indexOf(EOL);
+
+  idxCmdNameDelim = idxCmdNameDelim  > -1 ? idxCmdNameDelim : 32767;//INT16_MAX;
+  idxEOCmd = idxEOCmd  > -1 ? idxEOCmd : 32767;//INT16_MAX;
+  idxEOL = idxEOL  > -1 ? idxEOL : 32767;//INT16_MAX;
+
+  int idxRes = idxEOCmd < idxEOL? idxEOCmd: idxEOL;
+  return idxCmdNameDelim < idxRes? idxCmdNameDelim: idxRes;
+}
+
+bool isNotCorruptedCmdName(String i_strCmdName){
+  return !doesCmdNameContainDelimiters(i_strCmdName);
+}
+
+String pullCmdNameFromCmdLine(String& ir_strCmdLine){
+  if (fullPrint) { Serial.print(F("ENTER pullCmdNameFromCmdLine( '")); Serial.print(ir_strCmdLine); Serial.println("' )"); }
+  String strCmdName = ""; 
+  int idxEOCmdName = getFirstValidCmdNameDelimIdx(ir_strCmdLine);
+  if (fullPrint) { Serial.print(F("\tidxEOCmdName: ")); Serial.println(idxEOCmdName); }
+  if (idxEOCmdName > -1                         //Delimiter for CmdName detected?
+    && isNotCorruptedCmdName(ir_strCmdLine.substring(0, idxEOCmdName))  //could be that the serial read missed some bytes so we started in the middle of a cmd.
+     ){ 
+    strCmdName = ir_strCmdLine.substring(0, idxEOCmdName);
+    if (fullPrint) { Serial.print(F("\tir_strCmdLine.substring(0, idxEOCmdName); => : '")); Serial.print(strCmdName); Serial.println("' )"); }
+    ir_strCmdLine.remove(0, strCmdName.length()+1);
+    if (fullPrint) { Serial.print(F("\tir_strCmdLine.remove(0, strCmdName.length()+1); => : '")); Serial.print(ir_strCmdLine); Serial.println("' )"); }
+  }
+  else {
+    Serial.print(F("Failed to identify Cmd Name in Received LINE input from serial: '")); Serial.print(ir_strCmdLine); Serial.println("'");
+  }
+  return strCmdName;
+}
+
+bool isNotCorruptedParamValue(String i_strParamValue){
+  return !doesCmdNameContainDelimiters(i_strParamValue);
+}
+
+int getFirstValidParamDelimIdx(String& ir_strCmdLine){
+  int idxParamDelim = ir_strCmdLine.indexOf(PARAM_DELIM);
+  int idxEOCmd = ir_strCmdLine.indexOf(EOCMD);
+  int idxEOL = ir_strCmdLine.indexOf(EOL);
+
+  idxParamDelim = idxParamDelim > -1 ? idxParamDelim : 32767;//INT16_MAX;
+  idxEOCmd = idxEOCmd  > -1 ? idxEOCmd : 32767;//INT16_MAX;
+  idxEOL = idxEOL  > -1 ? idxEOL : 32767;//INT16_MAX;
+
+  int idxRes = idxEOCmd < idxEOL? idxEOCmd: idxEOL;
+  return idxParamDelim < idxRes? idxParamDelim: idxRes;
+}
+
+String pullParamValueFromCmdLine(String& ir_strCmdLine){
+  if (fullPrint) { Serial.print(F("ENTER pullParamValueFromCmdLine( '")); Serial.print(ir_strCmdLine); Serial.println("' )"); }
+  String strParamValue = "";
+  int idxParamDelim = getFirstValidParamDelimIdx(ir_strCmdLine);
+  if (fullPrint) { Serial.print(F("\tidxParamDelim: ")); Serial.println(idxParamDelim); }
+  if (idxParamDelim > -1                          //Delimiter for CmdName detected?
+    && isNotCorruptedCmdName(ir_strCmdLine.substring(0, idxParamDelim))  //could be that the serial read missed some bytes so we started in the middle of a cmd.
+    ){
+    strParamValue = ir_strCmdLine.substring(0, idxParamDelim);
+    if (fullPrint) { Serial.print(F("\tir_strCmdLine.substring(0, idxParamDelim); => : '")); Serial.print(strParamValue); Serial.println("' )"); }
+
+    ir_strCmdLine.remove(0, strParamValue.length()+1);
+    if (fullPrint) { Serial.print(F("\tir_strCmdLine.remove(0, strParamValue.length()+1); => : '")); Serial.print(ir_strCmdLine); Serial.println("' )"); }
+  }
+  return strParamValue;
+}
+
+void doConnectCmd(String& ir_strCmdLine){
+  if (fullPrint) { Serial.print(F("ENTER doConnect( '")); Serial.print(ir_strCmdLine); Serial.println("' )"); }
+  String ssid = pullParamValueFromCmdLine(ir_strCmdLine);
+  String pwd = pullParamValueFromCmdLine(ir_strCmdLine);
+  if (ssid.length() > 0){
+    initWifi(ssid.c_str(), pwd.c_str());
+  }
+}
+
+void doGetIPCmd(){
+ if(WiFi.isConnected()){  
+  Serial.print(WiFi.localIP());
+ }
+}
+
+void doIsConnectedCmd(){
+ Serial.print(WiFi.isConnected());
+}
+
+void execueCommands(String i_strCmdLine){
+  if (fullPrint) { Serial.print(F("ENTER execueCommands( '")); Serial.print(i_strCmdLine); Serial.println("' )"); }
+
+  String strCmd = pullCmdNameFromCmdLine(i_strCmdLine);
+
+  while(strCmd.length() > 0) {
+    strCmd.toUpperCase();
+    Serial.print(F("Received command: '")); Serial.print(strCmd); Serial.println("'");
+
+    if (strCmd.startsWith(WIFI_CONNECT)) {
+      doConnectCmd(i_strCmdLine);
+    } else if (strCmd.startsWith(GET_IP)) {
+      doGetIPCmd();
+    } else if (strCmd.startsWith(IS_CONNECTED)) {
+      doIsConnectedCmd();
+    }
+
+    strCmd = pullCmdNameFromCmdLine(i_strCmdLine);
+  }
+}
+
+void executeSerialLine(){
+  //if (fullPrint) { Serial.println(F("ENTER executeSerialLine()")); }
+  String strInputLine = readSerialCommandLine();
+  if (strInputLine.length() > 1){
+    execueCommands(strInputLine);
+  }
+}
+
