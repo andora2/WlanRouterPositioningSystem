@@ -34,13 +34,15 @@
 #include <ESP8266mDNS.h>
 
 #include <Wire.h>
-#include <Servo.h>
 #include <stdint.h>
 
-const char *ssid = "WifiApPosSysSrv";
-const char *password = "E892m76>";
-//const char *ssid = "MasterOfDisaster";
-//const char *password = "AVIYrJNBj5CXmP1Mt";
+//const char *ssid = "WifiApPosSysSrv";
+//const char *password = "E892m761";
+const char *ssid = "MasterOfDisaster";
+const char *password = "AVIYrJNBj5CXmP1Mt";
+//const char *ssid = "Gast_bei_Uns";
+//const char *password = "musafiri";
+
 
 #define EOL        '\n'
 #define EOCMD     ';'
@@ -67,6 +69,7 @@ int rssi[MAX_RSSI_VALUES];
 int rssi2[MAX_RSSI_VALUES];
 int rssi_idx = 0;
 int avgRSSI = 0;
+bool rssi_saved = false;
 
 
 void handleRoot() {
@@ -118,31 +121,16 @@ void handleNotFound() {
 	digitalWrite ( led, 0 );
 }
 
-void setup ( void ) {
-	pinMode ( led, OUTPUT );
-	digitalWrite ( led, 0 );
-	Serial.begin ( 115200 );
-
-  initWifi(ssid, password);
-
-  if ( MDNS.begin ( "esp8266" ) ) {
-    Serial.println ( "MDNS responder started" );
+void serial_log_verbose_ln(String msg) {
+  if (fullPrint) { 
+    Serial.println ( "HTTP server started" ); 
   }
+}
 
-	server.on ( "/", handleRoot );
-  server.on ( "/avg_rssi", restGetAvgRSSI );
-  server.on ( "/rssi", restGetCurrentRSSI );
-	server.on ( "/test.svg", drawGraph );
-  server.on ( "/are_you_a_wifi_sensor", []() {
-    server.send ( 200, "text/plain", "yes" );
-  } );
-
-	server.on ( "/inline", []() {
-		server.send ( 200, "text/plain", "this works as well" );
-	} );
-	server.onNotFound ( handleNotFound );
-	server.begin();
-	Serial.println ( "HTTP server started" );
+void serial_log_verbose(String msg) {
+  if (fullPrint) { 
+    Serial.println ( "HTTP server started" ); 
+  }
 }
 
 void initWifi(const char* i_ssid, const char* i_pwd){
@@ -163,6 +151,7 @@ void initWifi(const char* i_ssid, const char* i_pwd){
 
   // Wait for connection
   int count = 0;
+  WiFi.mode(WIFI_STA);
   while ( WiFi.status() != WL_CONNECTED ) {
     delay ( 500 );
     Serial.print ( "." );
@@ -190,42 +179,6 @@ void initWifi(const char* i_ssid, const char* i_pwd){
   Serial.print ( "IP address: " );
   Serial.println ( WiFi.localIP() );
 
-}
-
-bool rssi_saved = false;
-void loop ( void ) {
-	server.handleClient();
-
-  if( (millis() / 500) % 2 == 0 ){;
-    if(!rssi_saved){
-      avgRSSI = 0;
-      rssi_saved = true;
-      //rssi_idx++;
-      //rssi_idx = rssi_idx < MAX_RSSI_VALUES? rssi_idx: 0;
-      //rssi[rssi_idx] = (((-1 * WiFi.RSSI()) % 100)*3)%140;
-      rssi2[0] = (-1 * WiFi.RSSI()); //(((-1 * WiFi.RSSI()) % 100)*3)%140;
-      for (int i = 0 ; i < MAX_RSSI_VALUES-1; i++) {
-        rssi2[i+1] = rssi[i];
-      }
-      for (int i = 0 ; i < MAX_RSSI_VALUES; i++) {
-        rssi[i] = rssi2[i];
-        avgRSSI += rssi[i];
-      }
-      avgRSSI = avgRSSI / MAX_RSSI_VALUES;
-      
-      Serial.print ( "RSSI[");
-      //Serial.print ( rssi_idx );
-      Serial.print ( 0 );
-      Serial.print ( "]: " );
-      Serial.println ( rssi[0] );
-      Serial.print ( "AVG_RSSI: " );
-      Serial.println ( avgRSSI );
-      Serial.print ( "IP address: " );
-      Serial.println ( WiFi.localIP() );
-    }
-  } else {
-    rssi_saved=false;
-  }
 }
 
 void restGetAvgRSSI(){
@@ -459,3 +412,100 @@ void executeSerialLine(){
   }
 }
 
+
+void scanAvailableWifis(){
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(100);
+
+  Serial.println("scan start");
+  // WiFi.scanNetworks will return the number of networks found
+  int n = WiFi.scanNetworks();
+  Serial.println("scan done");
+  if (n == 0)
+    Serial.println("no networks found");
+  else
+  {
+    Serial.print(n);
+    Serial.println(" networks found");
+    for (int i = 0; i < n; ++i)
+    {
+      // Print SSID and RSSI for each network found
+      Serial.print(i + 1);
+      Serial.print(": ");
+      Serial.print(WiFi.SSID(i));
+      Serial.print(" (");
+      Serial.print(WiFi.RSSI(i));
+      Serial.print(")");
+      Serial.println((WiFi.encryptionType(i) == ENC_TYPE_NONE)?" ":"*");
+      delay(10);
+    }
+  }
+  Serial.println("");
+}
+/*******************************************************************/
+/*******************************************************************/
+/*              MAIN                   */
+/*******************************************************************/
+void setup ( void ) {
+  pinMode ( led, OUTPUT );
+  digitalWrite ( led, 0 );
+  Serial.begin ( 115200 );
+
+  initWifi(ssid, password);
+
+  if ( MDNS.begin ( "esp8266" ) ) {
+    if (fullPrint) { Serial.println ( "MDNS responder started" ); }
+  }
+
+  server.on ( "/", handleRoot );
+  server.on ( "/avg_rssi", restGetAvgRSSI );
+  server.on ( "/rssi", restGetCurrentRSSI );
+  server.on ( "/test.svg", drawGraph );
+  server.on ( "/are_you_a_wifi_sensor", []() {
+    server.send ( 200, "text/plain", "yes" );
+  } );
+
+  server.on ( "/inline", []() {
+    server.send ( 200, "text/plain", "this works as well" );
+  } );
+  server.onNotFound ( handleNotFound );
+  server.begin();
+  if (fullPrint) { Serial.println ( "HTTP server started" );}
+}
+
+void loop ( void ) {
+  server.handleClient();
+  executeSerialLine();
+
+  if( (millis() / 500) % 2 == 0 ){;
+    if(!rssi_saved){
+      avgRSSI = 0;
+      rssi_saved = true;
+      //rssi_idx++;
+      //rssi_idx = rssi_idx < MAX_RSSI_VALUES? rssi_idx: 0;
+      //rssi[rssi_idx] = (((-1 * WiFi.RSSI()) % 100)*3)%140;
+      rssi2[0] = (-1 * WiFi.RSSI()); //(((-1 * WiFi.RSSI()) % 100)*3)%140;
+      for (int i = 0 ; i < MAX_RSSI_VALUES-1; i++) {
+        rssi2[i+1] = rssi[i];
+      }
+      for (int i = 0 ; i < MAX_RSSI_VALUES; i++) {
+        rssi[i] = rssi2[i];
+        avgRSSI += rssi[i];
+      }
+      avgRSSI = avgRSSI / MAX_RSSI_VALUES;
+      
+      Serial.print ( "RSSI[");
+      //Serial.print ( rssi_idx );
+      Serial.print ( 0 );
+      Serial.print ( "]: " );
+      Serial.println ( rssi[0] );
+      Serial.print ( "AVG_RSSI: " );
+      Serial.println ( avgRSSI );
+      Serial.print ( "IP address: " );
+      Serial.println ( WiFi.localIP() );
+    }
+  } else {
+    rssi_saved=false;
+  }
+}

@@ -35,7 +35,7 @@ window.onload = function() {
 	g_refreshHeatMapInterval = startHeatMapAutoRefresh(g_REFRESH_RATE_MS);
 	registerSensorPosOnGroundPlan();
 	registerSensorSelection();
-	
+	registerBeaconConfigBtn();	
 };
 
 var getUrlParameter = function getUrlParameter(sParam) {
@@ -55,6 +55,18 @@ var getUrlParameter = function getUrlParameter(sParam) {
     }
 };
 
+function registerBeaconConfigBtn(){
+	$('#config_beacon_btn').click( function() {
+		$.ajax({
+		     async: false,
+		     type: 'GET',
+		     url: '../rest/sensor/config/' + $("#wifi_ssid").val() + "/" + $("#wifi_pwd").val() + "/" + $("#beacon_name").val(),
+		     success: function(data) {
+		          //callback
+		     }
+		});
+	});	
+}
 function registerSensorPosOnGroundPlan(){
 	$("#heatmapContainer").dblclick(function(event){ 
 		if( g_selectedSensor.sensor_chart_dbm_id.length > 0 ){
@@ -118,7 +130,7 @@ function loadCurrentSessionTpl(){
 				  timestamp: "2017-03-11 10:10:11",
 			      signal_dbm: -20,
 			      signal_quality_pct: 90,
-			},
+			}/*,
 			{ id: 3,
 				  name: "Küche",
 				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
@@ -195,7 +207,7 @@ function loadCurrentSessionTpl(){
 				  timestamp: "2017-03-11 10:10:11",
 			      signal_dbm: -20,
 			      signal_quality_pct: 90,
-			},
+			},*/
 			
 		]	
 	};

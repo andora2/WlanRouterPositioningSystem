@@ -17,6 +17,12 @@
 	    <artifactId>httpclient</artifactId>
 	    <version>4.5.3</version>
 	</dependency>    
+	<!-- https://mvnrepository.com/artifact/eu.miman.comm.arduino/arduino-serial-comm -->
+	<dependency>
+	    <groupId>eu.miman.comm.arduino</groupId>
+	    <artifactId>arduino-serial-comm</artifactId>
+	    <version>1.0.3</version>
+	</dependency>
   </dependencies>
   <build>
     <sourceDirectory>src</sourceDirectory>

@@ -16,6 +16,7 @@ import java.util.List;
 
 import javax.activation.DataHandler;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.servlet.ServletContext;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
@@ -28,20 +29,25 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
+import com.fazecast.jSerialComm.SerialPort;
 import com.ibm.websphere.jaxrs20.multipart.IAttachment;
 import com.ibm.websphere.jaxrs20.multipart.IMultipartBody;
 
+import arduino.Arduino;
 
 
-@Path( "main" )
+
+@Path( "sensor" )
 @Produces( MediaType.APPLICATION_JSON )
 @Consumes(MediaType.APPLICATION_JSON)
 @Stateless
 public class SensorMaintenanceWebService {
 	
+	@Inject
+	ArduinoSensor arduinoSensor;
+	
 	@GET
 	@Path( "/add_sensor/{id}" )
-	@Produces( MediaType.APPLICATION_JSON )
 	public Response move02(@PathParam("id") String sensorId) {
 		return Response.ok().build();
 		//return Response.serverError().build();
@@ -50,9 +56,31 @@ public class SensorMaintenanceWebService {
 		
 	@GET
 	@Path( "/sensors" )
-	@Produces( MediaType.APPLICATION_JSON )
 	public Response getSesnors() {
 		return Response.ok().build();
 	}
+	
+	@GET
+	@Path( "/config/{ssid}/{pwd}/{name}" )
+	public Response configure(@PathParam("ssid") String i_ssid, @PathParam("pwd") String i_pwd, @PathParam("name") String i_name ) {
+		boolean res = arduinoSensor.connectToWifi(i_ssid, i_pwd);
+		return res? Response.ok().build():
+			        Response.serverError().entity("Sensor failed to connect to Wifi!").build();
+	}
+	
+	@GET
+	@Path( "/connect_to_wifi/{ssid}/{pwd}" )
+	public Response connectToWifi(@PathParam("ssid") String i_ssid, @PathParam("pwd") String i_pwd ) {
+		boolean res = arduinoSensor.connectToWifi(i_ssid, i_pwd);
+		return res? Response.ok().build():
+			        Response.serverError().entity("Sensor failed to connect to Wifi!").build();
+	}
+		
+	@GET
+	@Path( "/serial_ports" )
+	public Response getSeriaPorts() {
+		return Response.ok(arduinoSensor.getSeriaPorts()).build();
+	}
+
 
 }
