@@ -42,7 +42,9 @@ const char *ssid = "MasterOfDisaster";
 const char *password = "AVIYrJNBj5CXmP1Mt";
 //const char *ssid = "Gast_bei_Uns";
 //const char *password = "musafiri";
+const char *hostname = "sensor.wlanappssys";
 
+Wifi.host(hostname.c_str());
 
 #define EOL        '\n'
 #define EOCMD     ';'
@@ -51,9 +53,10 @@ const char *password = "AVIYrJNBj5CXmP1Mt";
 #define DEFAULT_DELAY    50
 #define MAX_LENGTH_SERIAL_LINE 125 //longest expected cmd DELTA_XY x 5 => 25chars x 5 = 125chars  
 
+#define SET_HOST_NAME_CMD  "SET_HOST_NAME" // sets the wifi ssid
 #define SET_WIFI_SSID_CMD  "SET_WIFISSID" // sets the wifi ssid
 #define SET_WIFI_PWD_CMD  "SET_WIFIPWD" // sets the wifi pwd
-#define WIFI_CONNECT "WIFI_CONNECT" // sets the wifi pwd
+#define WIFI_CONNECT_CMD "WIFI_CONNECT_CMD" // sets the wifi pwd
 #define IS_CONNECTED "IS_CONNECTED" // sets the wifi pwd
 #define GET_IP "GET_IP" // sets the wifi pwd
 
@@ -368,8 +371,17 @@ void doConnectCmd(String& ir_strCmdLine){
   if (fullPrint) { Serial.print(F("ENTER doConnect( '")); Serial.print(ir_strCmdLine); Serial.println("' )"); }
   String ssid = pullParamValueFromCmdLine(ir_strCmdLine);
   String pwd = pullParamValueFromCmdLine(ir_strCmdLine);
+  String hostname = pullParamValueFromCmdLine(ir_strCmdLine);
   if (ssid.length() > 0){
-    initWifi(ssid.c_str(), pwd.c_str());
+    initWifi(ssid.c_str(), pwd.c_str(),hostname.c_str());
+  }
+}
+
+void setHostNameCmd(String& ir_strCmdLine){
+  if (fullPrint) { Serial.print(F("ENTER setHostName( '")); Serial.print(ir_strCmdLine); Serial.println("' )"); }
+  String hostname = pullParamValueFromCmdLine(ir_strCmdLine);
+  if (hostname.length() > 0){
+    Wifi.host(hostname.c_str());
   }
 }
 
@@ -392,12 +404,14 @@ void execueCommands(String i_strCmdLine){
     strCmd.toUpperCase();
     Serial.print(F("Received command: '")); Serial.print(strCmd); Serial.println("'");
 
-    if (strCmd.startsWith(WIFI_CONNECT)) {
+    if (strCmd.startsWith(WIFI_CONNECT_CMD)) {
       doConnectCmd(i_strCmdLine);
     } else if (strCmd.startsWith(GET_IP)) {
       doGetIPCmd();
     } else if (strCmd.startsWith(IS_CONNECTED)) {
       doIsConnectedCmd();
+    } else if (strCmd.startsWith(SET_HOST_NAME_CMD)) {
+      doSetHostNameCmd();
     }
 
     strCmd = pullCmdNameFromCmdLine(i_strCmdLine);
@@ -452,7 +466,7 @@ void setup ( void ) {
   digitalWrite ( led, 0 );
   Serial.begin ( 115200 );
 
-  initWifi(ssid, password);
+  initWifi(ssid, password, hostname);
 
   if ( MDNS.begin ( "esp8266" ) ) {
     if (fullPrint) { Serial.println ( "MDNS responder started" ); }
