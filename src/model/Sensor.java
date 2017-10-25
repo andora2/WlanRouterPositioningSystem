@@ -15,7 +15,7 @@ import java.util.List;
 	@NamedQuery(name="Sensor.getForSession", query="SELECT s FROM Sensor s WHERE s.planingsession.id = :sessionId"),	
 	@NamedQuery(name="Sensor.get", query="SELECT s FROM Sensor s WHERE s.id = :id"),	
 	@NamedQuery(name="Sensor.getByNameInSession", query="SELECT s FROM Sensor s WHERE s.planingsession.id = :sessionId AND "
-																			+ "	 s.locationname = :name"),	
+																			+ "	 s.name = :name"),	
 	@NamedQuery(name="Sensor.getByIpAddressInSession", query="SELECT s FROM Sensor s WHERE s.planingsession.id = :sessionId AND "
 																					+ "    s.ipaddress = :ipAddress"),	
 	
@@ -24,16 +24,18 @@ public class Sensor implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name = "ID", nullable = false, updatable = false, insertable = false)
-	private String id;
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	private int id;
 
-	private double geolat;
-
-	private double geolon;
+	private String name;
 
 	private String ipaddress;
 
-	private String locationname;
+	private String hostname;
+	
+	private double geolat;
+
+	private double geolon;
 
 	private int mapposx;
 
@@ -41,7 +43,6 @@ public class Sensor implements Serializable {
 
 	private int mapposz;
 
-	private String name;
 
 	//bi-directional many-to-one association to Planingsession
 	@ManyToOne
@@ -83,15 +84,7 @@ public class Sensor implements Serializable {
 		this.ipaddress = ipaddress;
 	}
 
-	public String getLocationname() {
-		return this.locationname;
-	}
-
-	public void setLocationname(String locationname) {
-		this.locationname = locationname;
-	}
-
-	public String getId() {
+	public int getId() {
 		return this.id;
 	}
 

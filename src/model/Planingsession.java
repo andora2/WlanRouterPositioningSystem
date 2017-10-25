@@ -19,7 +19,7 @@ public class Planingsession implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@Column(name = "ID", nullable = false, updatable = false, insertable = false)	
+	@GeneratedValue(strategy=GenerationType.IDENTITY)	
 	private int id;
 
 	private String name;

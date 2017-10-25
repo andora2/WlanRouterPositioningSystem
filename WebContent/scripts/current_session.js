@@ -18,10 +18,10 @@ window.onload = function() {
 		    type : "get",
 		    async: false,
 		    success : function(groundPlan) {
-				$("#select_ground_plan_img").attr("src", "../rest/main/image/" + groundPlan.filename);
-				$("#current_ground_plan_img").attr("src", "../rest/main/image/" + groundPlan.filename);
+				$("#select_ground_plan_img").attr("src", "../rest/groundplan/image/" + groundPlan.filename);
+				$("#current_ground_plan_img").attr("src", "../rest/groundplan/image/" + groundPlan.filename);
             	$('html, body').animate({
-                    scrollTop: $("#progress-bars3-12").offset().top
+                    scrollTop: $("#start_session_row").offset().top
                 }, 2000);
 
 		    },

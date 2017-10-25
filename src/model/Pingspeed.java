@@ -15,6 +15,7 @@ public class Pingspeed implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
 	@Id
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 
 	private int responsemstime;
@@ -27,7 +28,7 @@ public class Pingspeed implements Serializable {
 	@ManyToOne
 	@JoinColumns({
 		@JoinColumn(name="PLANINGSESSIONID", referencedColumnName="PLANINGSESSIONID"),
-		@JoinColumn(name="SENSORMACID", referencedColumnName="ID")
+		@JoinColumn(name="SENSORID", referencedColumnName="ID")
 		})
 	private Sensor sensor;
 

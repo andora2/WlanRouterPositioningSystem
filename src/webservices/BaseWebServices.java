@@ -54,11 +54,10 @@ import com.ibm.websphere.jaxrs20.multipart.IMultipartBody;
 @Stateless
 public class BaseWebServices {
 	
-	@GET
-	@Path("/image/{filename}")
-	@Produces( "image/jpg" )
-    public Response getImageByFileName(@PathParam("filename") String filename) {
-		File repositoryFile = new File(filename);
+	final static String  IMAGES_FILE_PATH = "images";
+	
+    protected Response getImageByFileName(String filename, String path) {
+		File repositoryFile = new File(toImageFilePath(filename,path));
         try {
         	final CacheControl cacheControl = new CacheControl();
             cacheControl.setMaxAge((int) TimeUnit.MINUTES.toSeconds(1)); 
@@ -69,6 +68,21 @@ public class BaseWebServices {
 		}
         return Response.ok("").build();
     }	
+
+	private String toImageFilePath(String filename, String path) {
+		String filePath = IMAGES_FILE_PATH + "\\";
+		filePath = path.isEmpty()? filePath: filePath + path.replaceAll("\\.\\.", "")
+															.replaceAll("~","")
+															.replaceAll(":","")
+															.replaceAll("\\\\\\\\","")
+															.trim() + "\\";
+		filePath += filename.replaceAll("\\.\\.", "")
+							.replaceAll("~","")
+							.replaceAll(":","")
+							.replaceAll("\\\\\\\\","")
+							.replaceAll("\\\\","").trim();
+		return filePath;
+	}
 
 	@GET
 	@Path("/image_names")
@@ -149,7 +163,7 @@ public class BaseWebServices {
 	            	  formElementValue = getFormDataValueFromFieldStream(stream);
 	        		  System.out.println(formElementName + ":" + formElementValue);
 	              } else {
-	               saveFormDataStreamToFile(stream, fileName);
+	               saveFormDataStreamToFile(stream, fileName, "");
 	             }
 	         }
 	         if (stream != null) {
@@ -163,8 +177,8 @@ public class BaseWebServices {
 	         return Response.ok().build();
 	}
 
-	protected void saveFormDataStreamToFile(InputStream stream, String fileName) {
-		File tempFile = new File(fileName);
+	protected void saveFormDataStreamToFile(InputStream stream, String fileName, String path) {
+		File tempFile = new File(toImageFilePath(fileName, path) );
 		   try {
 			   Files.copy(stream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
 		   } catch (IOException e) {

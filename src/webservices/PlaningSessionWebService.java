@@ -53,7 +53,7 @@ import repository.PlaningSessionRepositories;
 @Produces( MediaType.APPLICATION_JSON )
 @Consumes(MediaType.APPLICATION_JSON)
 @Stateless
-public class PlaningSessionMaintenanceWebService extends BaseWebServices {
+public class PlaningSessionWebService extends BaseWebServices {
 	
 	@Inject
 	PlaningSessionRepositories sessionRepo;

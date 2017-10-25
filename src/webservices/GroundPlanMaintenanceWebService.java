@@ -17,6 +17,7 @@ import java.nio.file.StandardCopyOption;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
 import javax.ejb.Stateless;
@@ -33,6 +34,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -54,6 +56,8 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 	final static String  FORMFIELD_DESCRIPTION = "description";
 	final static String  FORMFIELD_FILE = "file";
 	final static String  FORMFIELD_NAME = "name";
+
+	final static String  GROUND_PLAN_IMAGE_FILE_PATH = "groundplans";
 	
 	@Inject
 	GroundPlanRepositories repo;
@@ -83,7 +87,7 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 		String uploadedFileNameExtension = uploadedFileNameParts.length > 0? uploadedFileNameParts[uploadedFileNameParts.length-1]: "";
 		newGroundPlan.setFilename( getGroundPlanFileName(newGroundPlan.getName(), uploadedFileNameExtension) ); //The Name given by the user shall be the filename used to save the file on the server
 		InputStream fileStream = getFormDataFieldValues(multipartBody, FORMFIELD_FILE).get(0);
-		saveFormDataStreamToFile( fileStream, newGroundPlan.getFilename());
+		saveFormDataStreamToFile( fileStream, newGroundPlan.getFilename(), GROUND_PLAN_IMAGE_FILE_PATH );
 		/*try {
 			BufferedImage img = createResizedCopy(ImageIO.read(fileStream), 50, 50, false);
 			ImageIO.write(img, uploadedFileNameExtension, new File( getGroundPlanFileName(newGroundPlan.getName(), "thmb."+uploadedFileNameExtension)) );
@@ -112,6 +116,13 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 		return Response.serverError().entity("Unhandled exception. GroundPlan couldn't be added!").build();
 	}
 
+	@GET
+	@Path("/image/{filename}")
+	@Produces( "image/jpg" )
+    public Response getImageByFileName(@PathParam("filename") String filename) {
+		return super.getImageByFileName(filename, GROUND_PLAN_IMAGE_FILE_PATH);
+    }	
+	
 
 	private String getGroundPlanFileName(String newGroundPlanName, String uploadedFileNameExtension) {
 		String fileName = convertFreeTextToValidFileName(newGroundPlanName);
