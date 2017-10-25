@@ -10,9 +10,22 @@ import java.util.List;
  * 
  */
 @Entity
-@NamedQuery(name="Sensor.findAll", query="SELECT s FROM Sensor s")
+@NamedQueries({
+	@NamedQuery(name="Sensor.findAll", query="SELECT s FROM Sensor s"),
+	@NamedQuery(name="Sensor.getForSession", query="SELECT s FROM Sensor s WHERE s.planingsession.id = :sessionId"),	
+	@NamedQuery(name="Sensor.get", query="SELECT s FROM Sensor s WHERE s.id = :id"),	
+	@NamedQuery(name="Sensor.getByNameInSession", query="SELECT s FROM Sensor s WHERE s.planingsession.id = :sessionId AND "
+																			+ "	 s.locationname = :name"),	
+	@NamedQuery(name="Sensor.getByIpAddressInSession", query="SELECT s FROM Sensor s WHERE s.planingsession.id = :sessionId AND "
+																					+ "    s.ipaddress = :ipAddress"),	
+	
+})
 public class Sensor implements Serializable {
 	private static final long serialVersionUID = 1L;
+
+	@Id
+	@Column(name = "ID", nullable = false, updatable = false, insertable = false)
+	private String id;
 
 	private double geolat;
 
@@ -21,9 +34,6 @@ public class Sensor implements Serializable {
 	private String ipaddress;
 
 	private String locationname;
-
-	@Id
-	private String macid;
 
 	private int mapposx;
 
@@ -81,12 +91,8 @@ public class Sensor implements Serializable {
 		this.locationname = locationname;
 	}
 
-	public String getMacid() {
-		return this.macid;
-	}
-
-	public void setMacid(String macid) {
-		this.macid = macid;
+	public String getId() {
+		return this.id;
 	}
 
 	public int getMapposx() {

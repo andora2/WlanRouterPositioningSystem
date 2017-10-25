@@ -96,7 +96,7 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 		try{
 			repo.persist(newGroundPlan);
 			
-			return Response.ok(newGroundPlan.getFilename()).build();
+			return Response.ok(newGroundPlan).build();
 		} catch (  PersistenceException e){
 			Throwable cause = e.getCause();
 		    while (cause != null) {

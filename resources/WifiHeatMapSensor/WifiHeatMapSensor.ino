@@ -38,11 +38,11 @@
 
 //const char *ssid = "WifiApPosSysSrv";
 //const char *password = "E892m761";
+const char *hostname = "sensor.wlanappossys";
 const char *ssid = "MasterOfDisaster";
 const char *password = "AVIYrJNBj5CXmP1Mt";
 //const char *ssid = "Gast_bei_Uns";
 //const char *password = "musafiri";
-const char *hostname = "sensor.wlanappssys";
 
 Wifi.host(hostname.c_str());
 

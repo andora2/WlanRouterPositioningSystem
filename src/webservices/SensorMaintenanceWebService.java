@@ -47,14 +47,6 @@ public class SensorMaintenanceWebService {
 	ArduinoSensor arduinoSensor;
 	
 	@GET
-	@Path( "/add_sensor/{id}" )
-	public Response move02(@PathParam("id") String sensorId) {
-		return Response.ok().build();
-		//return Response.serverError().build();
-	}
-	
-		
-	@GET
 	@Path( "/sensors" )
 	public Response getSesnors() {
 		return Response.ok().build();

@@ -11,12 +11,18 @@ import java.util.List;
  * 
  */
 @Entity
-@NamedQuery(name="Planingsession.findAll", query="SELECT p FROM Planingsession p")
+@NamedQueries({
+	@NamedQuery(name="Planingsession.findAll", query="SELECT p FROM Planingsession p"),
+	@NamedQuery(name="Planingsession.get", query="SELECT p FROM Planingsession p WHERE p.id = :id")
+})
 public class Planingsession implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
+	@Column(name = "ID", nullable = false, updatable = false, insertable = false)	
 	private int id;
+
+	private String name;
 
 	private String description;
 
@@ -78,6 +84,14 @@ public class Planingsession implements Serializable {
 		sensor.setPlaningsession(null);
 
 		return sensor;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 }
