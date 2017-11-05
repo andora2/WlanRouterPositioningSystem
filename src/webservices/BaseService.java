@@ -52,7 +52,7 @@ import com.ibm.websphere.jaxrs20.multipart.IMultipartBody;
 @Produces( MediaType.APPLICATION_JSON )
 @Consumes(MediaType.APPLICATION_JSON)
 @Stateless
-public class BaseWebServices {
+public class BaseService {
 	
 	final static String  IMAGES_FILE_PATH = "images";
 	

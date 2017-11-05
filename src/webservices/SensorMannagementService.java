@@ -41,7 +41,7 @@ import arduino.Arduino;
 @Produces( MediaType.APPLICATION_JSON )
 @Consumes(MediaType.APPLICATION_JSON)
 @Stateless
-public class SensorMaintenanceWebService {
+public class SensorMannagementService {
 	
 	@Inject
 	ArduinoSensor arduinoSensor;

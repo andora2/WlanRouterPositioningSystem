@@ -59,18 +59,13 @@
         	<div class="media-content">
                 <h1 class="mbr-section-title mbr-white pb-3 mbr-fonts-style display-2">
                     SESSION</h1>
-		        <form id="config_session" class="form-inline align-center" >
 		            <div class="form-group">
 		                <input type="text" id="session_name"  class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="name" placeholder="Name">
 		            </div>
 		            <div class="form-group">
-		                <input type="text" id="wifi_ssid"  class="form-control input-sm input-inverse" name="wifi_ssid" required="yes" data-form-field="ssid" placeholder="WIFI SSID">
-		            </div>
-		            <div class="form-group">
-		                <input type="password" id="wifi_pwd" class="form-control input-sm input-inverse" name="wifi_pwd" required="yes" data-form-field="Password" placeholder="WIFI Password">
+		                <input type="text" id="session_description"  class="form-control input-sm input-inverse" name="description" required="no" data-form-field="description" placeholder="Description">
 		            </div>
 		            <button id="start_session_btn" class="btn btn-primary">START</button>
-		        </form>
 	        </div>
         </div>
     </div>
@@ -79,12 +74,12 @@
 
 <section class="progress-bars3 cid-qycAnNWSNl" id="progress-bars3-12" data-rv-view="1749">
 		  
-    <div class="container">
-        <h2 class="mbr-section-title pb-3 align-center mbr-fonts-style display-2">Wifi Beacons</h2>
+  <div class="container">
+    <h2 class="mbr-section-title pb-3 align-center mbr-fonts-style display-2">Wifi Beacons</h2>
 
-        <h3 class="mbr-section-subtitle mbr-fonts-style display-5">Name and Add new Beacons to the Ground Plan below</h3>
+    <h3 class="mbr-section-subtitle mbr-fonts-style display-5">Name and Add new Beacons to the Ground Plan below</h3>
 
-        <div id="sensor_chart_list" class="media-container-row pt-5 mt-2">
+    <div id="sensor_chart_list" class="media-container-row pt-5 mt-2">
         <div class="card-columns">
 {{#sensor_chart_list}}
             <div class="card p-3 align-center">
@@ -100,15 +95,28 @@
                 </div>                 
             </div>
 {{/sensor_chart_list}}
-        </div>
-        </div>
-        <form id="config_wifi_for_new_beacons" class="form-inline align-center" >
-            <div class="form-group">
-                <input type="text" id="beacon_name"  class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="name" placeholder="Name">
-	            <button id="config_beacon_btn" class="btn btn-primary">CONNECT</button>
+            <div class="card p-3 align-center">
+                <div >
+                    <h3 class="card-title py-2 mbr-fonts-style display-5">
+                        Connect new Sensor
+                    </h3>
+		            <div class="form-group">
+		                <input type="text" id="wifi_ssid"  class="form-control input-sm input-inverse" name="wifi_ssid" required="yes" data-form-field="ssid" placeholder="WIFI SSID">
+		            </div>
+		            <div class="form-group">
+		                <input type="password" id="wifi_pwd" class="form-control input-sm input-inverse" name="wifi_pwd" required="yes" data-form-field="Password" placeholder="WIFI Password">
+		            </div>
+		            <div class="form-group">
+		                <input type="text" id="beacon_name"  class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="name" placeholder="Name">
+		            </div>
+		            <button id="config_beacon_btn" class="btn btn-primary">CONNECT</button>
+                </div>                 
             </div>
-        </form>
+
+        </div>
 	</div>
+  </div>
+	
 </section>
 
 <section class="cid-qycqHqrjkO" id="image1-t" data-rv-view="1752">
@@ -117,7 +125,7 @@
 		
 		<div id="heatmapContainerWrapper" class="image-block" style="width: 50%;">
 		    <div id="heatmapContainer">
-                <img id="current_ground_plan_img" src="../rest/groundplan/image/adrian_allein_zu_hause.JPG" width="1400" alt="GrundRiss"  media-simple="true">
+                <img id="current_ground_plan_img" src="assets/images/SelectGroundPlanImage.jpg" width="1400" alt="GrundRiss"  media-simple="true">
 		    </div>
 	    </div>
     </figure>

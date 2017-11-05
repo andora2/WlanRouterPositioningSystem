@@ -49,7 +49,7 @@ import com.ibm.websphere.jaxrs20.multipart.IMultipartBody;
 @Produces( MediaType.APPLICATION_JSON )
 @Consumes(MediaType.APPLICATION_JSON)
 @Stateless
-public class MainWebService {
+public class TBD_MainWebService {
 	
 	@GET
 	@Path( "/add_sensor/{id}" )

@@ -51,7 +51,7 @@ import repository.GroundPlanRepositories;
 @Produces( MediaType.APPLICATION_JSON )
 @Consumes(MediaType.APPLICATION_JSON)
 @Stateless
-public class GroundPlanMaintenanceWebService extends BaseWebServices {
+public class GroundPlanMannagerService extends BaseService {
 	
 	final static String  FORMFIELD_DESCRIPTION = "description";
 	final static String  FORMFIELD_FILE = "file";
@@ -77,7 +77,7 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 	@POST
 	@Path( "/add" )
 	@Consumes("multipart/form-data")
-	@Produces("multipart/form-data")
+	//@Produces("multipart/form-data")
 	public Response add(IMultipartBody multipartBody) {
 		Groundplanimage newGroundPlan = new Groundplanimage();
 		newGroundPlan.setName( getNameFormFieldValue(multipartBody) );
@@ -99,7 +99,7 @@ public class GroundPlanMaintenanceWebService extends BaseWebServices {
 		
 		try{
 			repo.persist(newGroundPlan);
-			
+			repo.detach(newGroundPlan);
 			return Response.ok(newGroundPlan).build();
 		} catch (  PersistenceException e){
 			Throwable cause = e.getCause();

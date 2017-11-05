@@ -53,7 +53,7 @@ import repository.PlaningSessionRepositories;
 @Produces( MediaType.APPLICATION_JSON )
 @Consumes(MediaType.APPLICATION_JSON)
 @Stateless
-public class PlaningSessionWebService extends BaseWebServices {
+public class PlaningSessionWebService extends BaseService {
 	
 	@Inject
 	PlaningSessionRepositories sessionRepo;
@@ -85,6 +85,7 @@ public class PlaningSessionWebService extends BaseWebServices {
 		return persistNewSession(newSession);
 	}
 
+	
 	private Response persistNewSession(Planingsession newSession) {
 		try{
 			sessionRepo.persist(newSession);

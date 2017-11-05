@@ -2,58 +2,115 @@ var g_latestUploadedFile;
 var g_sensorList = [];
 var g_refreshHeatMapInterval;
 var g_REFRESH_RATE_MS = 400;
+var g_selectedGroundPlanId = function(){ getUrlParameter("ground_plan_id") };
 var g_selectedSensor = {
 			sensor_id:0,
 			sensor_chart_dbm_id: "" //"sensor_chart_dbm_"
 		};
+var g_currentSession;
+var g_currentGroundPlan;
+var g_selectedGroundPlan;
 
-var g_selectedGroundPlanId;
 
 window.onload = function() {
 	loadCurrentSessionTpl();
-	g_selectedGroundPlanId = getUrlParameter("ground_plan_id");
-	if( !( g_selectedGroundPlanId === undefined ) ){
+	initSelectedGroundPlan();
+	initCurrentSession();
+};
+
+function initCurrentSession(sessionId){
+	g_selectedGroundPlan = initSelectedGroundPlan();
+	if( isSet(g_selectedGroundPlan) ){
+    	$('html, body').animate({
+            scrollTop: $("#start_session_row").offset().top
+        }, 2000);
+	}
+
+	//Enable Session-START Button only if 
+	// - at least GroundPlan has been selected
+	// - OR Session already started.
+	if( isSet(g_selectedGroundPlan) || isSet(g_currentSession) ){
+		registerSessionStartConfigBtn();	
+	}
+
+	if( !isSet(g_currentSession)){
+		var currentSessionId = isSet(sessionId)? sessionId: getUrlParameter("current_session_id");
+		if( isSet(currentSessionId) ){
+			g_currentSession = loadSessionFromDB(currentSessionId);
+		}
+	}	
+	
+	if( isSet(g_currentSession) ){
+		$("#current_ground_plan_img").attr("src", "../rest/groundplan/image/" + g_currentSession.groundplanimage.filename);
+    	$('html, body').animate({
+            scrollTop: $("#sensor_chart_list").offset().top
+        }, 2000);
+    	
+		g_heatmap = initHeatMap();
+		initSensors(g_currentSession);
+		g_refreshHeatMapInterval = startHeatMapAutoRefresh(g_REFRESH_RATE_MS);
+		registerSensorPosOnGroundPlan();
+		registerSensorSelection();
+		registerBeaconConfigBtn();	
+	}
+}
+	
+function loadSessionFromDB(sessionId){
+	var loadedSession; 
+	if( isSet(sessionId) ){
 		$.ajax({
-		    url : "../rest/groundplan/get/" + g_selectedGroundPlanId,
+		    url : "../rest/session/get/" + sessionId,
+		    type : "get",
+		    async: false,
+		    success : function(session) {
+		    	loadedSession = session;
+		    },
+		    error: function() {
+		    	console.log("Failed to request the selected ground plan!(URL = '../rest/session/get/" + sessionId +"'");
+		    }
+		 });	
+	}	
+	return loadedSession;
+}
+
+function initSelectedGroundPlan(groundPlanId){
+	var selectedGroundPlanId = isSet(groundPlanId)? groundPlanId: getUrlParameter("ground_plan_id");
+	var selectedGroundPlan;
+	if( isSet(selectedGroundPlanId) ){
+		$.ajax({
+		    url : "../rest/groundplan/get/" + selectedGroundPlanId,
 		    type : "get",
 		    async: false,
 		    success : function(groundPlan) {
-				$("#select_ground_plan_img").attr("src", "../rest/groundplan/image/" + groundPlan.filename);
-				$("#current_ground_plan_img").attr("src", "../rest/groundplan/image/" + groundPlan.filename);
-            	$('html, body').animate({
-                    scrollTop: $("#start_session_row").offset().top
-                }, 2000);
-
+		    	selectedGroundPlan = groundPlan;
+				$("#select_ground_plan_img").attr("src", "../rest/groundplan/image/" + selectedGroundPlan.filename);
 		    },
 		    error: function() {
 		    	console.log("Failed to request the selected ground plan!(URL = '../rest/groundplan/get/" + g_selectedGroundPlanId +"'");
 		    }
 		 });	
 	}
-	g_heatmap = initHeatMap();
-	initSensors();
-	g_refreshHeatMapInterval = startHeatMapAutoRefresh(g_REFRESH_RATE_MS);
-	registerSensorPosOnGroundPlan();
-	registerSensorSelection();
-	registerBeaconConfigBtn();	
+	return selectedGroundPlan;
 };
 
-var getUrlParameter = function getUrlParameter(sParam) {
-	var location = window.location;
-	var urlElem = location.search.substring(1);
-    var sPageURL = decodeURIComponent( urlElem ); 
-    var sURLVariables = sPageURL.split('&');
-    var sParameterName;
-    var i;
+function registerSessionStartConfigBtn(){
+	$('#start_session_btn').click( function() {
+		$.ajax({
+		     async: false,
+		     type: 'GET',
+		     url: '../rest/planing_session/add/' + $("#session_name").val() + "/" + g_selectedGroundPlan.id + "/" + $("#session_description").val(),
+			 success : function(sessionData) {
+				 g_currentSession = sessionData;
+				 initCurrentSession();
+				 $("#start_session_btn").attr("enabled", false);
+			    },
+			 error: function() {
+			    	console.log("Failed to create new Session!(URL = '../rest/planing_session/add/" + $("#session_name").val() + "/" + g_selectedGroundPlan.id + "/" + $("#session_description").val() + "'");
+			    }
+		});
+	});	
+}
 
-    for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=');
-
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ? undefined : sParameterName[1];
-        }
-    }
-};
 
 function registerBeaconConfigBtn(){
 	$('#config_beacon_btn').click( function() {
@@ -61,9 +118,20 @@ function registerBeaconConfigBtn(){
 		     async: false,
 		     type: 'GET',
 		     url: '../rest/sensor/config/' + $("#wifi_ssid").val() + "/" + $("#wifi_pwd").val() + "/" + $("#beacon_name").val(),
-		     success: function(data) {
-		          //callback
-		     }
+			 success : function(sensorData) {
+				g_currentSession.sensors.push(sensorData);
+				addSensor(  sensorData.id, //i_id 
+							sensorData.hostname, //i_ip 
+							sensorData.name, //i_name
+							sensorData.description, //i_description
+							50, //x
+							50 //y 
+						 );
+							
+			    },
+			 error: function(result) {
+			    	console.log("Error: "+ result + "<b>Failed to register new Sensor for Session!(URL = '../rest/sensor/config/" + $("#wifi_ssid").val() + "/" + $("#wifi_pwd").val() + "/" + $("#beacon_name").val() + "'");
+			    }
 		});
 	});	
 }
@@ -86,7 +154,7 @@ function registerSensorSelection(){
 	$("div").click(function(event){
 		var sensorChartIdStart = "sensor_chart_dbm_";
 		var targetId = event.target.id;
-		if( !(event.target.id === undefined || event.target.id === null) && event.target.id.startsWith(sensorChartIdStart)){
+		if( isSet(event.target.id) && event.target.id.startsWith(sensorChartIdStart)){
 			if( g_selectedSensor.sensor_chart_dbm_id.length > 0 ){
 				$("#"+g_selectedSensor.sensor_chart_dbm_id).attr("style", "");
 			}
@@ -110,7 +178,7 @@ function getSensorFromGlobalListById(i_sensor_id){
 function loadCurrentSessionTpl(){
 	var data = {
 		sensor_chart_list: [
-			{ id: 1,
+			/*{ id: 1,
 			  name: "Sofa",
 			  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
 			  timestamp: "2017-03-11 10:10:11",
@@ -130,9 +198,9 @@ function loadCurrentSessionTpl(){
 				  timestamp: "2017-03-11 10:10:11",
 			      signal_dbm: -20,
 			      signal_quality_pct: 90,
-			}/*,
-			{ id: 3,
-				  name: "Küche",
+			},
+			{ id: 4,
+				  name: "Garten",
 				  description: "Irgend eine tolle beschreibung. Vieleicht auch mit addresse",
 				  timestamp: "2017-03-11 10:10:11",
 			      signal_dbm: -20,
@@ -212,6 +280,8 @@ function loadCurrentSessionTpl(){
 		]	
 	};
 	
+
+	
 	$.ajax({
 	    url : "current_session.tpl.html",
 	    type : "get",
@@ -230,22 +300,84 @@ function loadCurrentSessionTpl(){
 	  });*/	
 }
 
-function initSensors(){
-	addSensor(  1, //i_id 
-				"192.168.0.122", //i_ip 
-				"First Sesnor", //i_name
-				"No description yet", //i_description
-				50, //x
-				50 //y
-			);
-	
+
+function loadSessionSensorChartList(){
+	$.ajax({
+	    url : "../rest/session/sensors",
+	    type : "get",
+	    async: false,
+	    success : function(resultSensorList) {
+				$.ajax({
+				    url : "sensor_chart_galery_elements.tpl.html",
+				    type : "get",
+				    async: false,
+				    success : function(template) {
+				    	var data = { sensor_chart_list: [] };
+				    	resultSensorList.forEach( function(sensor, idx, origList) { 
+				    		data.sensor_chart_list[data.sensor_chart_list.length] = { id: sensor.id,
+				    																  name: sensor.name,
+				    																  description: sensor.description,
+				    																  timestamp: session.starttime,
+				    															      signal_dbm: -70,
+				    															      signal_quality_pct: 50,
+				    																};
+				    	} );
+					    var rendered = Mustache.render(template, data);
+					    $('#progress-bars3-12').html(rendered);
+				    },
+				    error: function(data) {
+				       ajaxError();
+				    }
+				 });	
+		    },
+		    error: function(data) {
+		       ajaxError();
+		    }
+		 });		
+}
+
+function initSensors(session){
+	if( isSet(session) ){
+		session.sensors.forEach( function(sensor, idx, origList) { 
+			addSensor(  sensor.id, //i_id 
+					sensor.hostname, //i_ip 
+					sensor.name, //i_name
+					sensor.description, //i_description
+					50, //x
+					50 //y
+				);
+		} );
+	}
+
+	/*addSensor(  1, //i_id 
+			"192.168.2.103", //i_ip 
+			"First Sesnor", //i_name
+			"No description yet", //i_description
+			50, //x
+			50 //y
+		);
 	addSensor(  2, //i_id 
-			"192.168.0.121", //i_ip 
+			"192.168.2.104", //i_ip 
 			"Second Sesnor", //i_name
 			"No description yet eather", //i_description
 			100, //x
 			200 //y
 		);
+	addSensor(  3, //i_id 
+			"192.168.2.105", //i_ip 
+			"Second Sesnor", //i_name
+			"No description yet eather", //i_description
+			100, //x
+			200 //y
+		);
+	addSensor(  4, //i_id 
+			"192.168.2.107", //i_ip 
+			"Second Sesnor", //i_name
+			"No description yet eather", //i_description
+			100, //x
+			200 //y
+		);*/
+
 }
 
 function addSensor(i_id, i_ip, i_name, i_description, i_x, i_y){

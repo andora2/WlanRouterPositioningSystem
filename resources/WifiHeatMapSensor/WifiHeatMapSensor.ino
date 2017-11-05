@@ -38,13 +38,15 @@
 
 //const char *ssid = "WifiApPosSysSrv";
 //const char *password = "E892m761";
-const char *hostname = "sensor.wlanappossys";
-const char *ssid = "MasterOfDisaster";
-const char *password = "AVIYrJNBj5CXmP1Mt";
+const char *g_hostname = "sensor3.wlanappossys";
+const char *ssid = "WLAN-130A45";
+const char *password = "6278996347999852";
+
+//const char *ssid = "MasterOfDisaster";
+//const char *password = "AVIYrJNBj5CXmP1Mt";
 //const char *ssid = "Gast_bei_Uns";
 //const char *password = "musafiri";
 
-Wifi.host(hostname.c_str());
 
 #define EOL        '\n'
 #define EOCMD     ';'
@@ -136,7 +138,7 @@ void serial_log_verbose(String msg) {
   }
 }
 
-void initWifi(const char* i_ssid, const char* i_pwd){
+void initWifi(const char* i_ssid, const char* i_pwd, const char* i_host){
   Serial.print ( "Disconnecting Wifi if connected." );
   if ( WiFi.status() == WL_CONNECTED ) {
     WiFi.disconnect();
@@ -145,6 +147,10 @@ void initWifi(const char* i_ssid, const char* i_pwd){
     delay ( 500 );
     Serial.print ( "." );
   }
+
+  WiFi.hostname(i_host);
+  Serial.print ( "Sensor HOST set to: " );
+  Serial.println ( i_host );
 
   Serial.println ( "" );
   Serial.print ( "Trying to connect to: " );
@@ -377,11 +383,11 @@ void doConnectCmd(String& ir_strCmdLine){
   }
 }
 
-void setHostNameCmd(String& ir_strCmdLine){
+void doSetHostNameCmd(String& ir_strCmdLine){
   if (fullPrint) { Serial.print(F("ENTER setHostName( '")); Serial.print(ir_strCmdLine); Serial.println("' )"); }
   String hostname = pullParamValueFromCmdLine(ir_strCmdLine);
   if (hostname.length() > 0){
-    Wifi.host(hostname.c_str());
+    WiFi.hostname(hostname.c_str());
   }
 }
 
@@ -411,7 +417,7 @@ void execueCommands(String i_strCmdLine){
     } else if (strCmd.startsWith(IS_CONNECTED)) {
       doIsConnectedCmd();
     } else if (strCmd.startsWith(SET_HOST_NAME_CMD)) {
-      doSetHostNameCmd();
+      doSetHostNameCmd(i_strCmdLine);
     }
 
     strCmd = pullCmdNameFromCmdLine(i_strCmdLine);
@@ -466,7 +472,7 @@ void setup ( void ) {
   digitalWrite ( led, 0 );
   Serial.begin ( 115200 );
 
-  initWifi(ssid, password, hostname);
+  initWifi(ssid, password, g_hostname);
 
   if ( MDNS.begin ( "esp8266" ) ) {
     if (fullPrint) { Serial.println ( "MDNS responder started" ); }
