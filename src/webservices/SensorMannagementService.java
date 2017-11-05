@@ -55,7 +55,7 @@ public class SensorMannagementService {
 	@GET
 	@Path( "/config/{ssid}/{pwd}/{name}" )
 	public Response configure(@PathParam("ssid") String i_ssid, @PathParam("pwd") String i_pwd, @PathParam("name") String i_name ) {
-		boolean res = arduinoSensor.connectToWifi(i_ssid, i_pwd);
+		boolean res = arduinoSensor.connectToWifi(i_ssid, i_pwd, i_name);
 		return res? Response.ok().build():
 			        Response.serverError().entity("Sensor failed to connect to Wifi!").build();
 	}
@@ -63,7 +63,7 @@ public class SensorMannagementService {
 	@GET
 	@Path( "/connect_to_wifi/{ssid}/{pwd}" )
 	public Response connectToWifi(@PathParam("ssid") String i_ssid, @PathParam("pwd") String i_pwd ) {
-		boolean res = arduinoSensor.connectToWifi(i_ssid, i_pwd);
+		boolean res = arduinoSensor.connectToWifi(i_ssid, i_pwd,"");
 		return res? Response.ok().build():
 			        Response.serverError().entity("Sensor failed to connect to Wifi!").build();
 	}
