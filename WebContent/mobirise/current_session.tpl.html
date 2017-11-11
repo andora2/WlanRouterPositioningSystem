@@ -36,39 +36,11 @@
     </nav>
 </section>
 
-<section class="engine"><a href="https://mobirise.co/d">web software</a></section><section class="header3 cid-qycPfmo1yn mbr-parallax-background" id="header3-1d" data-rv-view="1705">
+<section class="engine">
+	<a href="https://mobirise.co/d">web software</a>
+</section>
 
-    <div class="container">
-        <div class="media-container-row">
-            <div class="mbr-figure" style="width: 60%;">
-                <img id="select_ground_plan_img" src="assets/images/SelectGroundPlanImage.jpg" alt="Select your GroundPlan" media-simple="true">
-            </div>
-
-            <div class="media-content">
-                <h1 class="mbr-section-title mbr-white pb-3 mbr-fonts-style display-2">
-                    GROUND PLAN</h1>
-                
-                <div class="mbr-section-btn">
-	                <a class="btn btn-md btn-primary display-4" href="select_groundplan.html?session_id=1">SELECT</a>
-	            </div>
-
-        </div>
-    </div>
-    <div class="container"  id="start_session_row">
-        <div class="media-container-row pt-5 mt-2">
-        	<div class="media-content">
-                <h1 class="mbr-section-title mbr-white pb-3 mbr-fonts-style display-2">
-                    SESSION</h1>
-		            <div class="form-group">
-		                <input type="text" id="session_name"  class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="name" placeholder="Name">
-		            </div>
-		            <div class="form-group">
-		                <input type="text" id="session_description"  class="form-control input-sm input-inverse" name="description" required="no" data-form-field="description" placeholder="Description">
-		            </div>
-		            <button id="start_session_btn" class="btn btn-primary">START</button>
-	        </div>
-        </div>
-    </div>
+<section id="new_or_load_session_section" class="header3 cid-qycPfmo1yn mbr-parallax-background" id="header3-1d" data-rv-view="1705">
 
 </section>
 
@@ -81,20 +53,6 @@
 
     <div id="sensor_chart_list" class="media-container-row pt-5 mt-2">
         <div class="card-columns">
-{{#sensor_chart_list}}
-            <div class="card p-3 align-center">
-                <div class="wrap">
-                    <div id="sensor_chart_{{id}}" class="pie_progress progress{{id}}" role="progressbar" data-goal="50">
-                       	<p class="pie_progress__number mbr-fonts-style display-5" ></p>
-                    </div>
-                </div> 
-                <div >
-                    <h3 class="card-title py-2 mbr-fonts-style display-5">
-                        {{name}}<div id="sensor_chart_dbm_{{id}}">{{signal_dbm}}</div>
-                    </h3>
-                </div>                 
-            </div>
-{{/sensor_chart_list}}
             <div class="card p-3 align-center">
                 <div >
                     <h3 class="card-title py-2 mbr-fonts-style display-5">
@@ -112,7 +70,6 @@
 		            <button id="config_beacon_btn" class="btn btn-primary">CONNECT</button>
                 </div>                 
             </div>
-
         </div>
 	</div>
   </div>

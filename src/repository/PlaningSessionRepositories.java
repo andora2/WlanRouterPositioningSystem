@@ -33,5 +33,11 @@ public class PlaningSessionRepositories {
 				.setParameter("id", id)
 				.getSingleResult();
 	}
+
+	public Planingsession getLatest() {
+		List<Planingsession> res = entityManager.createNamedQuery("Planingsession.findAll", Planingsession.class)
+				.getResultList();
+		return res.isEmpty()? null: res.get(0);
+	}
 	
 }

@@ -68,6 +68,12 @@ public class PlaningSessionWebService extends BaseService {
 	}
 	
 	@GET
+	@Path( "/latest" )
+	public Response getLatest() {
+		return Response.ok(sessionRepo.getLatest()).build();
+	}
+
+	@GET
 	@Path( "/sensors/{planing_session_id}" )
 	public Response get(@PathParam("planing_session_id") int id) {
 		return Response.ok(sessionRepo.get(id).getSensors()).build();

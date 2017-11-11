@@ -1,0 +1,34 @@
+<div class="card-columns">
+{{#sensor_chart_list}}
+            <div class="card p-3 align-center">
+                <div class="wrap">
+                    <div id="sensor_chart_{{id}}" class="pie_progress progress{{id}}" role="progressbar" data-goal="50">
+                       	<p class="pie_progress__number mbr-fonts-style display-5" ></p>
+                    </div>
+                </div> 
+                <div >
+                    <h3 class="card-title py-2 mbr-fonts-style display-5">
+                        {{name}}<div id="sensor_chart_dbm_{{id}}">{{signal_dbm}}</div>
+                    </h3>
+                </div>                 
+            </div>
+{{/sensor_chart_list}}
+            <div class="card p-3 align-center">
+                <div >
+                    <h3 class="card-title py-2 mbr-fonts-style display-5">
+                        Connect new Sensor
+                    </h3>
+		            <div class="form-group">
+		                <input type="text" id="wifi_ssid"  class="form-control input-sm input-inverse" name="wifi_ssid" required="yes" data-form-field="ssid" placeholder="WIFI SSID">
+		            </div>
+		            <div class="form-group">
+		                <input type="password" id="wifi_pwd" class="form-control input-sm input-inverse" name="wifi_pwd" required="yes" data-form-field="Password" placeholder="WIFI Password">
+		            </div>
+		            <div class="form-group">
+		                <input type="text" id="beacon_name"  class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="name" placeholder="Name">
+		            </div>
+		            <button id="config_beacon_btn" class="btn btn-primary">CONNECT</button>
+                </div>                 
+            </div>
+</div>
+            

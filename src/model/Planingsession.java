@@ -12,7 +12,7 @@ import java.util.List;
  */
 @Entity
 @NamedQueries({
-	@NamedQuery(name="Planingsession.findAll", query="SELECT p FROM Planingsession p"),
+	@NamedQuery(name="Planingsession.findAll", query="SELECT p FROM Planingsession p order by p.starttime"),
 	@NamedQuery(name="Planingsession.get", query="SELECT p FROM Planingsession p WHERE p.id = :id")
 })
 public class Planingsession implements Serializable {

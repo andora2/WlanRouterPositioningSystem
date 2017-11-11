@@ -20,11 +20,6 @@ window.onload = function() {
 
 function initCurrentSession(sessionId){
 	g_selectedGroundPlan = initSelectedGroundPlan();
-	if( isSet(g_selectedGroundPlan) ){
-    	$('html, body').animate({
-            scrollTop: $("#start_session_row").offset().top
-        }, 2000);
-	}
 
 	//Enable Session-START Button only if 
 	// - at least GroundPlan has been selected
@@ -32,7 +27,8 @@ function initCurrentSession(sessionId){
 	if( isSet(g_selectedGroundPlan) || isSet(g_currentSession) ){
 		registerSessionStartConfigBtn();	
 	}
-
+	registerShowLatestSessionBtn()
+	
 	if( !isSet(g_currentSession)){
 		var currentSessionId = isSet(sessionId)? sessionId: getUrlParameter("current_session_id");
 		if( isSet(currentSessionId) ){
@@ -40,6 +36,10 @@ function initCurrentSession(sessionId){
 		}
 	}	
 	
+	startSession();	
+}
+
+function startSession(){
 	if( isSet(g_currentSession) ){
 		$("#current_ground_plan_img").attr("src", "../rest/groundplan/image/" + g_currentSession.groundplanimage.filename);
     	$('html, body').animate({
@@ -52,25 +52,41 @@ function initCurrentSession(sessionId){
 		registerSensorPosOnGroundPlan();
 		registerSensorSelection();
 		registerBeaconConfigBtn();	
-	}
+	}	
 }
-	
+
 function loadSessionFromDB(sessionId){
 	var loadedSession; 
 	if( isSet(sessionId) ){
 		$.ajax({
-		    url : "../rest/session/get/" + sessionId,
+		    url : "../rest/planing_session/get/" + sessionId,
 		    type : "get",
 		    async: false,
 		    success : function(session) {
 		    	loadedSession = session;
 		    },
 		    error: function() {
-		    	console.log("Failed to request the selected ground plan!(URL = '../rest/session/get/" + sessionId +"'");
+		    	console.log("Failed to request the selected ground plan!(URL = '../rest/planing_session/get/" + sessionId +"'");
 		    }
 		 });	
 	}	
 	return loadedSession;
+}
+
+function getLatestSessionFromDB(){
+	var latestSession; 
+	$.ajax({
+	    url : "../rest/planing_session/latest",
+	    type : "get",
+	    async: false,
+	    success : function(session) {
+	    	latestSession = session;
+	    },
+	    error: function() {
+	    	console.log("Failed to request the latest session!(URL = '../rest/planing_session/latest'");
+	    }
+	 });	
+	return latestSession;
 }
 
 function initSelectedGroundPlan(groundPlanId){
@@ -84,6 +100,13 @@ function initSelectedGroundPlan(groundPlanId){
 		    success : function(groundPlan) {
 		    	selectedGroundPlan = groundPlan;
 				$("#select_ground_plan_img").attr("src", "../rest/groundplan/image/" + selectedGroundPlan.filename);
+				$("#select_ground_plan_btn").text("Groundplan");
+				$("#select_ground_plan_btn").attr("class","btn btn-md btn-primary display-3");
+
+				$("#session_name_inputfield").attr("style","");
+				$("#session_description_inputfield").attr("style","");
+				$("#start_session_btn").attr("style","");
+				
 		    },
 		    error: function() {
 		    	console.log("Failed to request the selected ground plan!(URL = '../rest/groundplan/get/" + g_selectedGroundPlanId +"'");
@@ -93,19 +116,26 @@ function initSelectedGroundPlan(groundPlanId){
 	return selectedGroundPlan;
 };
 
+function registerShowLatestSessionBtn(){
+	$('#show_latest_session_btn').click( function() {
+		stopAndClearCurrentSession();
+		loadNewOrLatestSessionForm();
+	});	
+}
+
 function registerSessionStartConfigBtn(){
 	$('#start_session_btn').click( function() {
 		$.ajax({
 		     async: false,
 		     type: 'GET',
-		     url: '../rest/planing_session/add/' + $("#session_name").val() + "/" + g_selectedGroundPlan.id + "/" + $("#session_description").val(),
+		     url: '../rest/planing_session/add/' + $("#session_name_inputfield").val() + "/" + g_selectedGroundPlan.id + "/" + $("#session_description_inputfield").val(),
 			 success : function(sessionData) {
 				 g_currentSession = sessionData;
 				 initCurrentSession();
 				 $("#start_session_btn").attr("enabled", false);
 			    },
 			 error: function() {
-			    	console.log("Failed to create new Session!(URL = '../rest/planing_session/add/" + $("#session_name").val() + "/" + g_selectedGroundPlan.id + "/" + $("#session_description").val() + "'");
+			    	console.log("Failed to create new Session!(URL = '../rest/planing_session/add/" + $("#session_name_inputfield").val() + "/" + g_selectedGroundPlan.id + "/" + $("#session_description_inputfield").val() + "'");
 			    }
 		});
 	});	
@@ -289,6 +319,7 @@ function loadCurrentSessionTpl(){
 	    success : function(template) {
 		    var rendered = Mustache.render(template, data);
 		    $('#target').html(rendered);
+		    loadNewOrLatestSessionForm();
 	    },
 	    error: function() {
 	       connectionError();
@@ -300,10 +331,116 @@ function loadCurrentSessionTpl(){
 	  });*/	
 }
 
+function loadNewOrLatestSessionForm(){
+	var tplName = "create_session_form.tpl.html";
+	var latestSession; 
+
+	var selectedGroundPlanId = getUrlParameter("ground_plan_id");
+	if( !isSet(selectedGroundPlanId) ){
+		latestSession= getLatestSessionFromDB();
+		if( isSet(latestSession) ){
+			tplName = "new_or_load_latest_session.tpl.html";
+		}
+	}
+	
+	$.ajax({
+	    url : tplName,
+	    type : "get",
+	    async: false,
+	    success : function(template) {
+	    	var data =  {};
+	    	if( isSet(latestSession) ){
+	    		data = latestSession;
+	    	}
+		    var rendered = Mustache.render(template, data);
+		    $('#new_or_load_session_section').html(rendered);
+	    	if( isSet(latestSession) ){
+	    		setSessionFormTitle("Latest Session");
+	    		registerRestartLatestSessionBtn();
+	    		registerContinueLatestSessionBtn();
+	    		registerNewSessionBtn();
+	    	}
+	    },
+	    error: function() {
+	       connectionError();
+	    }
+	 });	
+}
+
+function setSessionFormTitle(i_text){
+	$('#current_session_form_title').text(i_text);
+}
+
+function registerRestartLatestSessionBtn(){
+	$('#restart_latest_session_btn').click( function() {
+		g_currentSession = getLatestSessionFromDB();
+		//remove sensordata? OR ask before?
+		startSession();
+	});	
+}
+
+function registerContinueLatestSessionBtn(){
+	$('#continue_latest_session_btn').click( function() {
+		g_currentSession = getLatestSessionFromDB();
+		//remove sensordata? OR ask before?
+		startSession();
+	});	
+}
+
+function stopAndClearCurrentSession(){
+	stopHeatMapAutoRefresh();
+	
+	//remove all SensorCharts
+	$.get('session_add_new_sensor_form_card_column.tpl.html', function(template) {
+	    var rendered = Mustache.render(template, {});
+	    $('#sensor_chart_list').html(rendered);
+	});
+	
+	//reset session groundplan image
+	$("#current_ground_plan_img").attr("src", "assets/images/SelectGroundPlanImage.jpg");
+
+	//reset all global-var's
+	g_selectedSensor = {
+			sensor_id:0,
+			sensor_chart_dbm_id: "" //"sensor_chart_dbm_"
+		};
+	g_currentSession = undefined;
+	g_currentGroundPlan = undefined;
+	g_selectedGroundPlan = undefined;	
+}
+
+function registerNewSessionBtn(){
+	$('#new_session_btn').click( function() {
+		stopAndClearCurrentSession()
+		
+		$.ajax({
+		    url : "create_session_form.tpl.html",
+		    type : "get",
+		    async: false,
+		    success : function(template) {
+		    	var data =  {};
+			    var rendered = Mustache.render(template, data);
+			    $('#new_or_load_session_section').html(rendered);
+			    
+				registerSessionStartConfigBtn();	
+				registerShowLatestSessionBtn();
+			    
+		    	$('html, body').animate({
+		            scrollTop: $("#new_or_load_session_section").offset().top
+		        }, 2000);
+			    
+		    },
+		    error: function() {
+		       connectionError();
+		    }
+		 });	
+
+	});	
+}
 
 function loadSessionSensorChartList(){
 	$.ajax({
-	    url : "../rest/session/sensors",
+	    url : "../rest/planing_session/sensors",
 	    type : "get",
 	    async: false,
 	    success : function(resultSensorList) {
@@ -523,4 +660,25 @@ function chopValueOnMinMaxBorder(i_min, i_max, i_value){
 	return i_value < i_min? i_min: i_value > i_max? i_max: i_value;
 }
 
-
+function loadMustachTemplateInHtmlElement(i_tplFileName, i_targetHtmlElementId, i_data, i_preOnSuccess, i_postOnSucces, i_onError){
+	$.ajax({
+	    url : i_tplFileName,
+	    type : "get",
+	    async: false,
+	    success : function(template) {
+	    	var data =  i_data;
+	    	if( isSet(i_preOnSuccess) ){
+		    	i_preOnSuccess(data, template);
+	    	}
+	    	
+	    	var rendered = Mustache.render(template, data);
+		    $('#new_or_load_session_section').html(rendered);
+	    	
+		    if( isSet(i_postOnSuccess) ){
+	    		i_postOnSuccess(data, template);
+	    	}
+	    },
+	    error: i_onError
+	 });	
+	
+}

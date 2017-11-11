@@ -1,4 +1,5 @@
 package webservices;
+import java.awt.HeadlessException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -29,7 +30,8 @@ public class ArduinoSensor {
 			String strCmd = "WIFI_CONNECT_CMD:" + i_ssid + "," + i_pwd + "," + i_hostname + ";\n";
 			myBoard.serialWrite(strCmd);
 			try {
-				return new SimpleTimeLimiter().callWithTimeout(connectionToWifiSucceeded(myBoard, i_ssid), 10, TimeUnit.SECONDS, true);
+				return connectionToWifiSucceeded(myBoard, i_ssid);
+				//return new SimpleTimeLimiter().callWithTimeout(connectionToWifiSucceeded(myBoard, i_ssid), 10, TimeUnit.SECONDS, true);
 			} 
 		    catch (InterruptedException e) {
 		        Thread.currentThread().interrupt();
@@ -39,24 +41,28 @@ public class ArduinoSensor {
 		        throw Throwables.propagate(e);
 		    }
 		    finally {
-		        
-		    }
+			    	if( myBoard != null ){ 
+			    		myBoard.closeConnection();
+			    	}
+		    	}
 		}		
 		return false;
 	}
 		
-	private Callable<Boolean> connectionToWifiSucceeded(Arduino board, String i_ssid) throws InterruptedException {
+	private boolean connectionToWifiSucceeded(Arduino board, String i_ssid) throws InterruptedException {
 		List<String> serialLines = Arrays.asList( board.serialRead().split("\n") );
-		while( !serialLines.isEmpty() ){
+		int i = 0;
+		while( !serialLines.isEmpty() && i<10){
 			System.out.println(serialLines.toString());
 			if( serialLines.stream().anyMatch(serialLine -> serialLine.startsWith("Connected to " + i_ssid)) ){
-				return Callables.returning(true);
+				return true;
 			}
-			serialLines = Arrays.asList( board.serialRead().split("\n") );
-			wait(1000);
+			serialLines = Arrays.asList( board.serialRead().replaceAll("\n", " ").split(";") );
+			Thread.sleep(1000);
+			i++;
 		}
 				
-		return Callables.returning(false);
+		return false;
 	}
 
 	public SerialPort[] getSeriaPorts() {
@@ -68,7 +74,9 @@ public class ArduinoSensor {
 	}
 		
 	protected void closeArduinoConnection(){
-		getOpenBoard().closeConnection();
+		if( this.board != null ){
+			this.board.closeConnection();
+		}
 	}
 
 	protected SerialPort getLastNotYetOpenSerialPort(){
@@ -127,7 +135,11 @@ public class ArduinoSensor {
 			if( board != null) board.closeConnection();
 			//if( board == null) 
 			resBoard = new Arduino(serialPort.getSystemPortName(), 115200);
-			isOpenConnection = resBoard.openConnection();
+			try{
+				isOpenConnection = resBoard.openConnection();
+			} catch (HeadlessException e){
+				System.out.println("try another port");
+			}
 			if( !isOpenConnection ){
 				System.out.println("Connection failed on port: '" + serialPort.getSystemPortName() + "'");
 				board = null;
