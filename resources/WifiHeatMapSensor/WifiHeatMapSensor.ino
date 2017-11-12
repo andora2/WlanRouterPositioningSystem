@@ -393,7 +393,7 @@ void doSetHostNameCmd(String& ir_strCmdLine){
 
 void doGetIPCmd(){
  if(WiFi.isConnected()){  
-  Serial.print(WiFi.localIP());
+  Serial.print(F(";IP:")); Serial.print(F(WiFi.localIP())); Serial.println(F(";")); }
  }
 }
 
@@ -515,7 +515,7 @@ void loop ( void ) {
       }
       avgRSSI = avgRSSI / MAX_RSSI_VALUES;
       
-      Serial.print ( "RSSI[");
+      /*Serial.print ( "RSSI[");
       //Serial.print ( rssi_idx );
       Serial.print ( 0 );
       Serial.print ( "]: " );
@@ -523,7 +523,7 @@ void loop ( void ) {
       Serial.print ( "AVG_RSSI: " );
       Serial.println ( avgRSSI );
       Serial.print ( "IP address: " );
-      Serial.println ( WiFi.localIP() );
+      Serial.println ( WiFi.localIP() ); */
     }
   } else {
     rssi_saved=false;
