@@ -2,7 +2,10 @@ package model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.Date;
 
 
 /**
@@ -51,7 +54,7 @@ public class Pingspeed implements Serializable {
 		this.responsemstime = responsemstime;
 	}
 
-	public Timestamp getSavedtime() {
+	public Date getSavedtime() {
 		return this.savedtime;
 	}
 

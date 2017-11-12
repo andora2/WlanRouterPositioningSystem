@@ -2,6 +2,11 @@ package model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import org.codehaus.jackson.annotate.JsonIgnore;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
 import java.util.List;
 
 
@@ -47,6 +52,7 @@ public class Sensor implements Serializable {
 	//bi-directional many-to-one association to Planingsession
 	@ManyToOne
 	@JoinColumn(name="PLANINGSESSIONID", referencedColumnName="ID")
+	@JsonIgnore
 	private Planingsession planingsession;
 
 	//bi-directional many-to-one association to Rssi
@@ -120,10 +126,11 @@ public class Sensor implements Serializable {
 		this.name = name;
 	}
 
-	public Planingsession getPlaningsession() {
+	/*public Planingsession getPlaningsession() { 
 		return this.planingsession;
-	}
+	}*/
 
+	@JsonIgnore
 	public void setPlaningsession(Planingsession planingsession) {
 		this.planingsession = planingsession;
 	}

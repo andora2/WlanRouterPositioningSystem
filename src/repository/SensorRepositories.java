@@ -26,5 +26,9 @@ public class SensorRepositories {
 		entityManager.flush();
 		//entityManager.getTransaction().commit();
 	}
+
+	public void detach(Sensor sensor) {
+		entityManager.detach(sensor);
+	}
 	
 }

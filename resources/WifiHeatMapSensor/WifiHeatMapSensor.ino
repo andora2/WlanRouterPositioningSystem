@@ -61,6 +61,8 @@ const char *password = "6278996347999852";
 #define WIFI_CONNECT_CMD "WIFI_CONNECT_CMD" // sets the wifi pwd
 #define IS_CONNECTED "IS_CONNECTED" // sets the wifi pwd
 #define GET_IP "GET_IP" // sets the wifi pwd
+#define IS_WRPS_SENSOR "IS_WRPS_SENSOR" // sets the wifi pwd
+
 
 bool fullPrint = true;
 bool fullStop = false;
@@ -393,9 +395,16 @@ void doSetHostNameCmd(String& ir_strCmdLine){
 
 void doGetIPCmd(){
  if(WiFi.isConnected()){  
-  Serial.print(F(";IP:")); Serial.print(F(WiFi.localIP())); Serial.println(F(";")); }
+  Serial.print(F(";GOT_IP:")); Serial.print(WiFi.localIP()); Serial.println(F(";")); 
  }
 }
+
+void doIsWRPSSensorCmd(){
+ if(WiFi.isConnected()){  
+  Serial.print(F(";IS_WRPS_SENSOR:YES;")); 
+ }
+}
+
 
 void doIsConnectedCmd(){
  Serial.print(WiFi.isConnected());
@@ -418,6 +427,8 @@ void execueCommands(String i_strCmdLine){
       doIsConnectedCmd();
     } else if (strCmd.startsWith(SET_HOST_NAME_CMD)) {
       doSetHostNameCmd(i_strCmdLine);
+    }else if (strCmd.startsWith(IS_WRPS_SENSOR)) {
+      doIsWRPSSensorCmd();
     }
 
     strCmd = pullCmdNameFromCmdLine(i_strCmdLine);
@@ -472,10 +483,10 @@ void setup ( void ) {
   digitalWrite ( led, 0 );
   Serial.begin ( 115200 );
 
-  initWifi(ssid, password, g_hostname);
+  //initWifi(ssid, password, g_hostname);
 
   if ( MDNS.begin ( "esp8266" ) ) {
-    if (fullPrint) { Serial.println ( "MDNS responder started" ); }
+    if (fullPrint) { Serial.println ( "MDNS responder started;" ); }
   }
 
   server.on ( "/", handleRoot );
@@ -528,4 +539,5 @@ void loop ( void ) {
   } else {
     rssi_saved=false;
   }
+  
 }

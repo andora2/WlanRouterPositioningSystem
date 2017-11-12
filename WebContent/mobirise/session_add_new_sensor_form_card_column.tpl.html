@@ -5,13 +5,15 @@
                         Connect new Sensor
                     </h3>
 		            <div class="form-group">
-		                <input type="text" id="wifi_ssid"  class="form-control input-sm input-inverse" name="wifi_ssid" required="yes" data-form-field="ssid" placeholder="WIFI SSID">
+		                <select id="wifi_ssid" class="form-control select-sm input-inverse" name="wifi_ssid" required="yes" data-form-field="ssid" placeholder="WIFI SSID">
+		                </select>
+		                <button id="refresh_ssid_list_btn" class="btn btn-secondary">Refresh</button>
 		            </div>
 		            <div class="form-group">
 		                <input type="password" id="wifi_pwd" class="form-control input-sm input-inverse" name="wifi_pwd" required="yes" data-form-field="Password" placeholder="WIFI Password">
 		            </div>
 		            <div class="form-group">
-		                <input type="text" id="beacon_name"  class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="name" placeholder="Name">
+		                <input type="text" id="beacon_name"  class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="name" placeholder="Location Name">
 		            </div>
 		            <button id="config_beacon_btn" class="btn btn-primary">CONNECT</button>
                 </div>                 

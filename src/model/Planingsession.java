@@ -2,7 +2,12 @@ package model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.codehaus.jackson.map.annotate.JsonSerialize.Inclusion;
+
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 
@@ -12,14 +17,14 @@ import java.util.List;
  */
 @Entity
 @NamedQueries({
-	@NamedQuery(name="Planingsession.findAll", query="SELECT p FROM Planingsession p order by p.starttime"),
+	@NamedQuery(name="Planingsession.findAll", query="SELECT p FROM Planingsession p order by p.starttime desc"),
 	@NamedQuery(name="Planingsession.get", query="SELECT p FROM Planingsession p WHERE p.id = :id")
 })
 public class Planingsession implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)	
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private int id;
 
 	private String name;
@@ -68,6 +73,7 @@ public class Planingsession implements Serializable {
 		return this.sensors;
 	}
 
+	
 	public void setSensors(List<Sensor> sensors) {
 		this.sensors = sensors;
 	}
@@ -92,6 +98,10 @@ public class Planingsession implements Serializable {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 }

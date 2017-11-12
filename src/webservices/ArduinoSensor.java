@@ -1,5 +1,6 @@
 package webservices;
 import java.awt.HeadlessException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -24,13 +25,15 @@ public class ArduinoSensor {
 	String strSelectedComPort = "";
 	
 	
-	public boolean connectToWifi(String i_ssid, String i_pwd, String i_hostname ) {
+	public String connectToWifi(String i_ssid, String i_pwd, String i_hostname ) {
 		Arduino myBoard = connectToArduino();
 		if( myBoard != null ){
 			String strCmd = "WIFI_CONNECT_CMD:" + i_ssid + "," + i_pwd + "," + i_hostname + ";\n";
 			myBoard.serialWrite(strCmd);
 			try {
-				return connectionToWifiSucceeded(myBoard, i_ssid);
+				if( connectionToWifiSucceeded(myBoard, i_ssid) ){
+					return getIp(myBoard);
+				}
 				//return new SimpleTimeLimiter().callWithTimeout(connectionToWifiSucceeded(myBoard, i_ssid), 10, TimeUnit.SECONDS, true);
 			} 
 		    catch (InterruptedException e) {
@@ -46,15 +49,40 @@ public class ArduinoSensor {
 			    	}
 		    	}
 		}		
-		return false;
+		return "";
 	}
-		
-	private boolean connectionToWifiSucceeded(Arduino board, String i_ssid) throws InterruptedException {
-		List<String> serialLines = Arrays.asList( board.serialRead().split("\n") );
+
+	private String getIp(Arduino board) throws InterruptedException {
+		String res = "";
+		String strCmd = "GET_IP:;\n";
+		board.serialWrite(strCmd);
+		List<String> serialLines = Arrays.asList( board.serialRead().replaceAll("\n", " ").split(";") );
 		int i = 0;
 		while( !serialLines.isEmpty() && i<10){
 			System.out.println(serialLines.toString());
-			if( serialLines.stream().anyMatch(serialLine -> serialLine.startsWith("Connected to " + i_ssid)) ){
+			res = serialLines.stream().filter(serialLine -> serialLine.trim().startsWith("GOT_IP:")).findFirst().orElse("");
+			if( !res.isEmpty() ){
+				String[] resList = !res.isEmpty()? res.split(":"): null;
+				res = resList.length == 2? resList[1]: "";
+				break;
+			}
+			serialLines = Arrays.asList( board.serialRead().replaceAll("\n", " ").split(";") );
+			Thread.sleep(1000);
+			i++;
+		}
+				
+		return res;
+	}
+	
+	private boolean isWRPSSensor(Arduino board) throws InterruptedException {
+		String strCmd = "IS_WRPS_SENSOR:;\n";
+		board.serialWrite(strCmd);
+		List<String> serialLines = Arrays.asList( board.serialRead().replaceAll("\n", " ").split(";") );
+		int i = 0;
+		while( !serialLines.isEmpty() && i<10){
+			System.out.println(serialLines.toString());
+			String foundReponse = serialLines.stream().filter(serialLine -> serialLine.trim().contains("IS_WRPS_SENSOR:YES")).findFirst().orElse("");
+			if( !foundReponse.isEmpty() ){
 				return true;
 			}
 			serialLines = Arrays.asList( board.serialRead().replaceAll("\n", " ").split(";") );
@@ -63,8 +91,33 @@ public class ArduinoSensor {
 		}
 				
 		return false;
+	}	
+	private boolean connectionToWifiSucceeded(Arduino board, String i_ssid) throws InterruptedException {
+		return waitForPatternInSerialOutStream( board, "Connected to " + i_ssid, 10);
 	}
 
+	private boolean waitForPatternInSerialOutStream(Arduino board, String i_strPattern, int i_nSeconds) throws InterruptedException { 
+		List<String> serialLines = Arrays.asList( board.serialRead().replaceAll("\n", " ").split(";") );
+		int i = 0;
+		while( !serialLines.isEmpty() && i<i_nSeconds){
+			System.out.println(serialLines.toString());
+			for (String serialLine : serialLines) {
+				if(serialLine.trim().startsWith(i_strPattern)){
+					return true;
+				}
+			}
+				
+			/*if( serialLines.stream().anyMatch(serialLine -> serialLine.trim().startsWith(i_strPattern)) ){
+				return true;
+			}*/
+			serialLines = Arrays.asList( board.serialRead().replaceAll("\n", " ").split(";") );
+			Thread.sleep(1000);
+			i++;
+		}
+				
+		return false;
+	}
+	
 	public SerialPort[] getSeriaPorts() {
 		return SerialPort.getCommPorts();
 	}
@@ -136,19 +189,22 @@ public class ArduinoSensor {
 			//if( board == null) 
 			resBoard = new Arduino(serialPort.getSystemPortName(), 115200);
 			try{
-				isOpenConnection = resBoard.openConnection();
+				if( resBoard.openConnection() && isWRPSSensor(resBoard) ){
+					System.out.println("Connection succeeded on port: '" + serialPort.getSystemPortName() + "'");
+					board = resBoard;
+					return resBoard;
+				}
 			} catch (HeadlessException e){
-				System.out.println("try another port");
+				e.printStackTrace();
+				System.out.println("Exception while trying to open a connection the device on the current serial port. Try another port");
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				System.out.println("Exception during wait for pattern to make sure the serial device is one of our sensors. Try another port");
 			}
-			if( !isOpenConnection ){
-				System.out.println("Connection failed on port: '" + serialPort.getSystemPortName() + "'");
-				board = null;
-				return null;
-			} else {
-				System.out.println("Connection succeeded on port: '" + serialPort.getSystemPortName() + "'");
-				board = resBoard;
-				return resBoard;
-			}
+
+			System.out.println("Connection failed on port: '" + serialPort.getSystemPortName() + "'");
+			board = null;
+			return null;
 		}
 		return resBoard;
 	}

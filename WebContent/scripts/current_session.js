@@ -10,7 +10,7 @@ var g_selectedSensor = {
 var g_currentSession;
 var g_currentGroundPlan;
 var g_selectedGroundPlan;
-
+var g_currentGeoLocation;
 
 window.onload = function() {
 	loadCurrentSessionTpl();
@@ -45,6 +45,8 @@ function startSession(){
     	$('html, body').animate({
             scrollTop: $("#sensor_chart_list").offset().top
         }, 2000);
+    	
+    	loadSessionSensorChartList(g_currentSession.id);
     	
 		g_heatmap = initHeatMap();
 		initSensors(g_currentSession);
@@ -141,19 +143,46 @@ function registerSessionStartConfigBtn(){
 	});	
 }
 
+function getCurrentGeoLonLat(){
+	return isSet(g_currentGeoLocation) && isSet(g_currentGeoLocation.coords)?
+			{lon: g_currentGeoLocation.coords.latitude,
+			 lat: g_currentGeoLocation.coords.longitude }:
+			{lon: 0.0,
+			 lat: 0.0 };
+}
+
+function getCurrentGeoLon(){
+	location.coords.latitude;
+	location.coords.longitude;
+}
+
+function refreshGeoLocation(){
+	if(navigator.geolocation)
+	    navigator.geolocation.getCurrentPosition(handleGetCurrentPosition, onError);
+}
+
+function handleGetCurrentPosition(location){
+	g_currentGeoLocation = location;
+}
+
+function onError(){
+	g_currentGeoLocation = location;
+}
 
 function registerBeaconConfigBtn(){
 	$('#config_beacon_btn').click( function() {
+		refreshGeoLocation();
+		geoLocation = getCurrentGeoLonLat();
 		$.ajax({
 		     async: false,
 		     type: 'GET',
-		     url: '../rest/sensor/config/' + $("#wifi_ssid").val() + "/" + $("#wifi_pwd").val() + "/" + $("#beacon_name").val(),
+		     url: '../rest/sensor/add/' + g_currentSession.id + "/" + $("#wifi_ssid").val() + "/" + $("#wifi_pwd").val() + "/" + $("#beacon_name").val() + "/" + geoLocation.lon + "/" + geoLocation.lat,
 			 success : function(sensorData) {
 				g_currentSession.sensors.push(sensorData);
 				addSensor(  sensorData.id, //i_id 
 							sensorData.hostname, //i_ip 
 							sensorData.name, //i_name
-							sensorData.description, //i_description
+							//sensorData.description, //i_description
 							50, //x
 							50 //y 
 						 );
@@ -319,6 +348,8 @@ function loadCurrentSessionTpl(){
 	    success : function(template) {
 		    var rendered = Mustache.render(template, data);
 		    $('#target').html(rendered);
+		    initSSIDList();
+		    registerWifiSSIDListRefreshBtn();
 		    loadNewOrLatestSessionForm();
 	    },
 	    error: function() {
@@ -331,6 +362,40 @@ function loadCurrentSessionTpl(){
 	  });*/	
 }
 
+function registerWifiSSIDListRefreshBtn(){
+	$('#refresh_ssid_list_btn').click(initSSIDList);	
+}
+
+function initSSIDList(){
+	$('#wifi_ssid').empty();
+	$.ajax({
+	    url : '../rest/sensor/ssid_list',
+	    type : "get",
+	    async: true,
+	    success : function(ssidList) {
+			if( isSet(ssidList) ){
+				$.each(ssidList, function (i, ssid) {
+				    $('#wifi_ssid').append($('<option>', { 
+				        value: ssid,
+				        text : ssid 
+				    }));
+				});				
+			}
+	    },
+	    error: function() {
+	       connectionError();
+	    }
+	});
+	
+/*	$.get('../rest/sensor/ssid_list', function(ssidList) {
+		if( isSet(ssidList) ){
+			ssidList.forEach( function(ssid) {
+				$("#wifi_ssid").append(ssid);
+			});
+		}
+	  });
+	  */	
+}
 function loadNewOrLatestSessionForm(){
 	var tplName = "create_session_form.tpl.html";
 	var latestSession; 
@@ -438,9 +503,9 @@ function registerNewSessionBtn(){
 	});	
 }
 
-function loadSessionSensorChartList(){
+function loadSessionSensorChartList(i_sessionid){
 	$.ajax({
-	    url : "../rest/planing_session/sensors",
+	    url : "../rest/planing_session/sensors/" + i_sessionid,
 	    type : "get",
 	    async: false,
 	    success : function(resultSensorList) {
@@ -453,14 +518,12 @@ function loadSessionSensorChartList(){
 				    	resultSensorList.forEach( function(sensor, idx, origList) { 
 				    		data.sensor_chart_list[data.sensor_chart_list.length] = { id: sensor.id,
 				    																  name: sensor.name,
-				    																  description: sensor.description,
-				    																  timestamp: session.starttime,
 				    															      signal_dbm: -70,
 				    															      signal_quality_pct: 50,
 				    																};
 				    	} );
 					    var rendered = Mustache.render(template, data);
-					    $('#progress-bars3-12').html(rendered);
+					    $('#sensor_chart_list').html(rendered);
 				    },
 				    error: function(data) {
 				       ajaxError();
@@ -477,52 +540,20 @@ function initSensors(session){
 	if( isSet(session) ){
 		session.sensors.forEach( function(sensor, idx, origList) { 
 			addSensor(  sensor.id, //i_id 
-					sensor.hostname, //i_ip 
+					sensor.ipaddress, //i_ip 
 					sensor.name, //i_name
-					sensor.description, //i_description
 					50, //x
 					50 //y
 				);
 		} );
 	}
-
-	/*addSensor(  1, //i_id 
-			"192.168.2.103", //i_ip 
-			"First Sesnor", //i_name
-			"No description yet", //i_description
-			50, //x
-			50 //y
-		);
-	addSensor(  2, //i_id 
-			"192.168.2.104", //i_ip 
-			"Second Sesnor", //i_name
-			"No description yet eather", //i_description
-			100, //x
-			200 //y
-		);
-	addSensor(  3, //i_id 
-			"192.168.2.105", //i_ip 
-			"Second Sesnor", //i_name
-			"No description yet eather", //i_description
-			100, //x
-			200 //y
-		);
-	addSensor(  4, //i_id 
-			"192.168.2.107", //i_ip 
-			"Second Sesnor", //i_name
-			"No description yet eather", //i_description
-			100, //x
-			200 //y
-		);*/
-
 }
 
-function addSensor(i_id, i_ip, i_name, i_description, i_x, i_y){
+function addSensor(i_id, i_ip, i_name, i_x, i_y){
 	g_sensorList[g_sensorList.length] = {
 		id: i_id,
 		ip: i_ip,
 		name: i_name,
-		description: i_description,
 		heatmapData: {
 			x: i_x,
 			y: i_y,
@@ -587,19 +618,24 @@ function onRefreshHeatMap() {
 
 function onRefreshHeatMapWifiSignalValues() {
 	updateWifiSignalValuesForAllSensors();
-	var newHeatMapData = getWifiSignalHeatMapDataFromAllSensors(); 
-    g_heatmap.setData(newHeatMapData);        
+	var newHeatMapData = getWifiSignalHeatMapDataFromAllSensors();
+	if( isSet( newHeatMapData ) ){
+	    g_heatmap.setData(newHeatMapData);        
+	}
 };
 
 function getWifiSignalHeatMapDataFromAllSensors(){
-	var resWifiSignalDataPoints = getWifiSignalHeatMapDataPoints();
-	var res = { 
-		min: g_sensorList[0].heatmapData.wifiSignal_dbm.min,
-		max: g_sensorList[0].heatmapData.wifiSignal_dbm.max,
-		data: resWifiSignalDataPoints
-		};
-	
-	return res;
+	if(isSet(g_sensorList) && g_sensorList.length > 0){
+		var resWifiSignalDataPoints = getWifiSignalHeatMapDataPoints();
+		var res = { 
+			min: g_sensorList[0].heatmapData.wifiSignal_dbm.min,
+			max: g_sensorList[0].heatmapData.wifiSignal_dbm.max,
+			data: resWifiSignalDataPoints
+			};
+		
+		return res;
+	}
+	return null;
 };
 
 function getWifiSignalHeatMapDataPoints(){
@@ -624,36 +660,39 @@ function updateWifiSignalValuesForAllSensors(){
 				return false;
 				});
 	return false;*/
-	g_sensorList.forEach( function(sensor, idx, origList) { 
+	if(isSet(g_sensorList)){
+		g_sensorList.forEach( function(sensor, idx, origList) { 
 			refreshWifiSignalValueAsync(sensor); 
 		} );
-
+	}
 };
 
 function refreshWifiSignalValueAsync(i_sensor){
-	var urlGetRSSI = 'http://' + i_sensor.ip + '/rssi';
-	return $.ajax({
-	     async: true,
-	     type: 'GET',
-	     url: urlGetRSSI,
-	     timeout: 1500,
-	     success: function(i_dbmRSSIValue) {
-	    	var newVal =  parseInt(i_dbmRSSIValue);
-	    	i_sensor.heatmapData.wifiSignal_dbm.value = chopValueOnMinMaxBorder(  i_sensor.heatmapData.wifiSignal_dbm.min, 
-	    																		  i_sensor.heatmapData.wifiSignal_dbm.max,
-	    																		  newVal );
-	    	
-	    	var quality =  ((newVal - i_sensor.heatmapData.wifiSignal_dbm.min) / (i_sensor.heatmapData.wifiSignal_dbm.max - i_sensor.heatmapData.wifiSignal_dbm.min))*100;
-	    	$('#sensor_chart_'+ i_sensor.id).asPieProgress("go", quality);
-	    	$('#sensor_chart_dbm_'+ i_sensor.id).text( newVal + ' dbm' );
+	if(isSet(i_sensor) && isSet(i_sensor.ip) && i_sensor.ip.length >= 7 ){
+		var urlGetRSSI = 'http://' + i_sensor.ip + '/rssi';
+		return $.ajax({
+		     async: true,
+		     type: 'GET',
+		     url: urlGetRSSI,
+		     timeout: 1500,
+		     success: function(i_dbmRSSIValue) {
+		    	var newVal =  parseInt(i_dbmRSSIValue);
+		    	i_sensor.heatmapData.wifiSignal_dbm.value = chopValueOnMinMaxBorder(  i_sensor.heatmapData.wifiSignal_dbm.min, 
+		    																		  i_sensor.heatmapData.wifiSignal_dbm.max,
+		    																		  newVal );
+		    	
+		    	var quality =  ((newVal - i_sensor.heatmapData.wifiSignal_dbm.min) / (i_sensor.heatmapData.wifiSignal_dbm.max - i_sensor.heatmapData.wifiSignal_dbm.min))*100;
+		    	$('#sensor_chart_'+ i_sensor.id).asPieProgress("go", quality);
+		    	$('#sensor_chart_dbm_'+ i_sensor.id).text( newVal + ' dbm' );
 
-	     },
-		
-		error: function(){
-			// if sensor value is not retreivable we lost the connection => asumeing signal loss
-			i_sensor.heatmapData.wifiSignal_dbm.value = i_sensor.heatmapData.wifiSignal_dbm.min;
-		}
-	});	
+		     },
+			
+			error: function(){
+				// if sensor value is not retreivable we lost the connection => asumeing signal loss
+				i_sensor.heatmapData.wifiSignal_dbm.value = i_sensor.heatmapData.wifiSignal_dbm.min;
+			}
+		});	
+	}
 }
 
 function chopValueOnMinMaxBorder(i_min, i_max, i_value){
