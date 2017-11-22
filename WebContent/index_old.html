@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <style>
+      #heatmapContainerWrapper { width:100%; height:100%; position:absolute; }
+      #heatmapContainer { width:100%; height:100%;}
+      #all-examples-info { position:absolute; background:white; font-size:16px; padding:20px; top:100px; width:350px; line-height:150%; border:1px solid rgba(0,0,0,.2);}
+	  .coveringCanvas {
+	      width:100%;
+	      height:100%;
+	      position:absolute;
+	      top:0px;
+	      left:0px;
+	  }
+	</style>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="lib/bootstrap4/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container-fluid">
+		<div class="col">
+	    	<div class="row">
+				<div class="col">
+				    1
+				</div>    	
+				<div class="col-6">
+				    <h1>WLAN AccessPoint positioning system</h1>
+				</div>    	
+				<div class="col">
+					3			    
+				</div>    	
+			</div>    	
+			<div class="row">
+				<div class="col">
+				<div class="col">
+					<form action="rest/main/upload_image" method="POST" enctype="multipart/form-data">
+						<div class="form-group">
+						    <label for="fileidinput">Name</label>
+						    <input name="fileid" id="fileidinput" class="form-control form-control-lg" type="text" placeholder="Enter Name">
+						    <small id="fileIdHelp" class="form-text text-muted">Enter the name of the Groundplan</small>
+						</div>						    
+						<div class="form-group">
+						    <label for="descriptioninput">Description</label>
+						    <input name="description" id="descriptioninput" class="form-control form-control-lg" type="text" placeholder="Enter description">
+						    <small id="descriptioninputHelp" class="form-text text-muted">Enter the name of the Groundplan</small>
+						</div>						    
+					    <div class="form-group">
+						    <label for="fileBrowseInput">Select File</label>
+						    <input name="thefile" type="file" class="form-control-file" id="fileBrowseInput">
+						    <small id="fileinputHelp" class="form-text text-muted">Select the image file with the ground plan to upload</small>
+					    </div>
+					    <button name="submit" value="submit" type="submit" class="btn btn-primary">Submit</button>
+					</form>
+				</div>    	
+				</div>    	
+				<div class="col-6">
+					<div class="media">
+				    	<canvas id="myCanvas" class="coveringCanvas"></canvas>
+						<div id="heatmapContainerWrapper" class="media-body">
+						    <div id="heatmapContainer">
+								<img class="rounded img-thumbnail" alt="GrundRiss" src="rest/main/image/IMG_3547.JPG"></<img>
+						    </div>
+					    </div>
+				    </div>
+				</div>    	
+				<div class="col">
+					3			    
+				</div>    	
+			</div>    	
+		</div>
+	</div>    
+
+	
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="lib/jquery/jquery-3.1.1.min.js"></script>
+    <script src="lib/bootstrap4/js/popper.min.js"></script>
+    <script src="lib/bootstrap4/js/bootstrap.min.js"></script>
+    <script src="lib/heatmap.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="scripts/drag_n_drop.js"></script>
+  </body>
+</html>

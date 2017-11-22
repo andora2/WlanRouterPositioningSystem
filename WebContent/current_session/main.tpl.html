@@ -36,60 +36,82 @@
     </nav>
 </section>
 
-<section class="engine">
-	<a href="https://mobirise.co/d">web software</a>
-</section>
-
 <section id="new_or_load_session_section" class="header3 cid-qycPfmo1yn mbr-parallax-background" id="header3-1d" data-rv-view="1705">
 
 </section>
-
+  
 <section class="progress-bars3 cid-qycAnNWSNl" id="progress-bars3-12" data-rv-view="1749">
-		  
   <div class="container">
-    <h2 class="mbr-section-title pb-3 align-center mbr-fonts-style display-2">Wifi Beacons</h2>
+<div id="accordion" role="tablist" aria-multiselectable="true">
+  <div class="card">
+    <div class="card-header" role="tab" id="headingTwo">
+	    <h2 class="mbr-section-title pb-3 align-center mbr-fonts-style display-2">
+	        <a data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+		    	Wifi Beacons
+		    </a>
+	    </h2>
+	    <h3 class="mbr-section-subtitle mbr-fonts-style display-5">Name and Add new Beacons to the Ground Plan below</h3>
+    </div>
 
-    <h3 class="mbr-section-subtitle mbr-fonts-style display-5">Name and Add new Beacons to the Ground Plan below</h3>
-
-    <div id="sensor_chart_list" class="media-container-row pt-5 mt-2">
-        <div class="card-columns">
-            <div class="card p-3 align-center">
-                <div >
-                    <h3 class="card-title py-2 mbr-fonts-style display-5">
-                        Connect new Sensor
-                    </h3>
-		            <div class="form-group">
-		                <select id="wifi_ssid" class="form-control select-sm input-inverse" name="wifi_ssid" required="yes" data-form-field="ssid" placeholder="WIFI SSID">
-		                </select>
-		                <button id="refresh_ssid_list_btn" class="btn btn-secondary">Refresh</button>
-		            </div>
-		            <div class="form-group">
-		                <input type="password" id="wifi_pwd" class="form-control input-sm input-inverse" name="wifi_pwd" required="yes" data-form-field="Password" placeholder="WIFI Password">
-		            </div>
-		            <div class="form-group">
-		                <input type="text" id="beacon_name"  class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="name" placeholder="Location Name">
-		            </div>
-		            <button id="config_beacon_btn" class="btn btn-primary">CONNECT</button>
-                </div>                 
-            </div>
-        </div>
+    <div id="collapseTwo" class="collapse show" role="tabpanel" aria-labelledby="headingTwo">
+      <div class="card-block">
+	    <div id="sensor_chart_list" class="media-container-row pt-5 mt-2">
+	        <div class="card-columns">
+	            <div class="card p-3 align-center">
+	                <div >
+	                    <h3 class="card-title py-2 mbr-fonts-style display-5">
+	                        Connect new Sensor
+	                    </h3>
+			            <div class="form-group">
+			                <select id="wifi_ssid" class="form-control select-sm input-inverse" name="wifi_ssid" required="yes" data-form-field="ssid" placeholder="WIFI SSID">
+			                </select>
+			                <button id="refresh_ssid_list_btn" class="btn btn-secondary">Refresh</button>
+			            </div>
+			            <div class="form-group">
+			                <input type="password" id="wifi_pwd" class="form-control input-sm input-inverse" name="wifi_pwd" required="yes" data-form-field="Password" placeholder="WIFI Password">
+			            </div>
+			            <div class="form-group">
+			                <input type="text" id="beacon_name"  class="form-control input-sm input-inverse" name="name" required="yes" data-form-field="name" placeholder="Location Name">
+			            </div>
+			            <button id="config_beacon_btn" class="btn btn-primary">CONNECT</button>
+	                </div>                 
+	            </div>
+	        </div>
+		</div>
+	  </div>
 	</div>
   </div>
-	
-</section>
 
-<section class="cid-qycqHqrjkO" id="image1-t" data-rv-view="1752">
+  <div class="card">
+    <div class="card-header" role="tab" id="headingThree">
+	   <h2 class="mbr-section-title pb-3 align-center mbr-fonts-style display-2">
+        <a data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+          WIFI GroundPlan HeatMap 
+        </a>
+      </h2>
+    </div>
 
-    <figure class="mbr-figure container">
+    <div id="collapseThree" class="collapse show" role="tabpanel" aria-labelledby="headingThree">
+      <div class="card-block">
+		<section class="cid-qycqHqrjkO" id="image1-t" data-rv-view="1752">
 		
-		<div id="heatmapContainerWrapper" class="image-block" style="width: 50%;">
-		    <div id="heatmapContainer">
-                <img id="current_ground_plan_img" src="assets/images/SelectGroundPlanImage.jpg" width="1400" alt="GrundRiss"  media-simple="true">
-		    </div>
-	    </div>
-    </figure>
-</section>
+		    <figure class="mbr-figure container">
+				
+				<div id="heatmapContainerWrapper" class="image-block" style="width: 100%;">
+				    <div id="heatmapContainer">
+		                <img id="current_ground_plan_img" src="assets/images/SelectGroundPlanImage.jpg" width="100%" alt="GrundRiss"  media-simple="true">
+				    </div>
+			    </div>
+		    </figure>
+		</section>
+	  </div>
+	</div>
+  </div>
 
+ </div>
+ </div>
+</section>
+	
   <script src="assets/web/assets/jquery/jquery.min.js" defer></script>
   <script src="assets/popper/popper.min.js" defer></script>
   <script src="assets/tether/tether.min.js" defer></script>

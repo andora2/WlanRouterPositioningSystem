@@ -14,7 +14,7 @@ function initGroundPlanUploadHandler(){
         var formData = new FormData(this);
 
         $.ajax({
-            url: "../rest/groundplan/add",
+            url: "rest/groundplan/add",
             type: 'POST',
             data: formData,
             async: false,
@@ -65,12 +65,12 @@ function loadSelectGroundPlanTpl(){
 	};*/
 	
 	$.ajax({
-	    url : "../rest/groundplan/all",
+	    url : "rest/groundplan/all",
 	    type : "get",
 	    async: false,
 	    success : function(resultGroundPlanList) {
 				$.ajax({
-				    url : "select_ground_plan.tpl.html",
+				    url : "groundplans/select_ground_plan.tpl.html",
 				    type : "get",
 				    async: false,
 				    success : function(template) {
@@ -88,7 +88,7 @@ function loadSelectGroundPlanTpl(){
 		    }
 		 });	
 	
-	/*$.get('select_ground_plan.tpl.html', function(template) {
+	/*$.get('groundplans/select_ground_plan.tpl.html', function(template) {
 	    var rendered = Mustache.render(template, data);
 	    $('#target').html(rendered);
 	  });	*/
@@ -96,12 +96,12 @@ function loadSelectGroundPlanTpl(){
 
 function loadGroundPlans(){
 	$.ajax({
-	    url : "../rest/groundplan/all",
+	    url : "rest/groundplan/all",
 	    type : "get",
 	    async: false,
 	    success : function(resultGroundPlanList) {
 				$.ajax({
-				    url : "ground_plan_galery_elements.tpl.html",
+				    url : "groundplans/ground_plan_galery_elements.tpl.html",
 				    type : "get",
 				    async: false,
 				    success : function(template) {

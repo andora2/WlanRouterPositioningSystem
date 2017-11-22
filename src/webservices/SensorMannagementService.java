@@ -16,6 +16,8 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 import javax.activation.DataHandler;
 import javax.ejb.Stateless;
@@ -28,6 +30,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
@@ -61,7 +64,19 @@ public class SensorMannagementService {
 	@GET
 	@Path( "/sensors" )
 	public Response getSesnors() {
-		return Response.ok().build();
+		List<Sensor> allSensors = sensorRepo.getAllSensor();
+    	final CacheControl cacheControl = new CacheControl();
+        cacheControl.setMaxAge((int) TimeUnit.MINUTES.toSeconds(1)); 
+        return Response.ok(allSensors).cacheControl(cacheControl).build();
+	}
+
+	@GET
+	@Path( "/sensors/{sessionid}" )
+	public Response getSensorsOfSession(@PathParam("sessionid") int i_nSessionId){
+		List<Sensor> forSession = sensorRepo.getForSession(i_nSessionId);
+    	final CacheControl cacheControl = new CacheControl();
+        cacheControl.setMaxAge((int) TimeUnit.MINUTES.toSeconds(1)); 
+        return Response.ok(forSession).cacheControl(cacheControl).build();
 	}
 	
 	@GET
@@ -72,8 +87,10 @@ public class SensorMannagementService {
 							  @PathParam("name") String i_name,
 							  @PathParam("lon") double i_lon,
 							  @PathParam("lat") double i_lat) {
-		Response res = Response.serverError().entity("Failed to add new Sensor for given parameters!").build();
-		String resIP = arduinoSensor.connectToWifi(i_ssid, i_pwd, i_name);
+    	final CacheControl cacheControl = new CacheControl();
+        cacheControl.setMaxAge((int) TimeUnit.MINUTES.toSeconds(1)); 
+		Response res = Response.serverError().entity("Failed to add new Sensor for given parameters!").cacheControl(cacheControl).build();
+		String resIP = "192.168.100." + (int)(10+(Math.random()*200.0d));//arduinoSensor.connectToWifi(i_ssid, i_pwd, i_name);
 		try {
 			//boolean reachble = Inet4Address.getByName(resIP).isReachable(2000);
 			if(!resIP.isEmpty() /*&& Inet4Address.getByName(resIP).isReachable(2000)*/){
@@ -85,12 +102,12 @@ public class SensorMannagementService {
 				newSensor.setGeolon(i_lon);
 				sensorRepo.persist(newSensor);
 				sensorRepo.detach(newSensor);
-				res = Response.ok(newSensor).build();	
+				res = Response.ok(newSensor).cacheControl(cacheControl).build();	
 			}
 		} catch (Exception/*IOException*/ e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			res = Response.serverError().entity("Received Sensor IP('" + resIP + "') is not reachable!").build();
+			res = Response.serverError().entity("Received Sensor IP('" + resIP + "') is not reachable!").cacheControl(cacheControl).build();
 		}
 		return res;
 	}
@@ -144,4 +161,24 @@ public class SensorMannagementService {
 		return Response.ok(ssids).build();
 		
 	}
+
+	@GET
+	@Path( "/delete/{sensorid}" )
+	public Response configure(@PathParam("sensorid") int i_sensorId) {
+    	final CacheControl cacheControl = new CacheControl();
+        cacheControl.setMaxAge((int) TimeUnit.MINUTES.toSeconds(0)); 
+		Response res = Response.serverError().entity("Failed to remove Sensor for given parameters!").cacheControl(cacheControl).build();
+		try {
+			Sensor sensor = sensorRepo.getSensor(i_sensorId);
+			sensorRepo.delete(sensor);
+			sensorRepo.detach(sensor);
+			res = Response.ok(sensor).cacheControl(cacheControl).build();	
+		} catch (Exception/*IOException*/ e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			res = Response.serverError().entity("Failed to find/remove Sensor ('" + i_sensorId + "')" ).cacheControl(cacheControl).build();
+		}
+		return res;
+	}
+
 }

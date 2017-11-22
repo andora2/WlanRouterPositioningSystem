@@ -44,6 +44,7 @@ import com.ibm.websphere.jaxrs20.multipart.IMultipartBody;
 
 import model.Groundplanimage;
 import model.Planingsession;
+import model.Sensor;
 import repository.GroundPlanRepositories;
 import repository.PlaningSessionRepositories;
 
@@ -76,7 +77,9 @@ public class PlaningSessionWebService extends BaseService {
 	@GET
 	@Path( "/sensors/{planing_session_id}" )
 	public Response get(@PathParam("planing_session_id") int id) {
-		return Response.ok(sessionRepo.get(id).getSensors()).build();
+		Planingsession planingsession = sessionRepo.get(id);
+		List<Sensor> sensors = planingsession.getSensors();
+		return Response.ok(sensors).build();
 	}
 	
 	@GET

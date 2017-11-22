@@ -1,0 +1,20 @@
+{{#sensor_chart_list}}
+    <div id="sensor_chart_card_{{id}}" class="card p-3 align-center">
+        <div class="card-wrapper  popup-btn">
+            <div id="sensor_chart_{{id}}" class="pie_progress progress{{id}}" role="progressbar" data-goal="50">
+	            <div id="sensor_chart_deactivated_overlay_{{id}}" class="mbr-overlay" style="display:none;"></div>
+               	<p class="pie_progress__number mbr-fonts-style display-5" ></p>
+            </div>
+        </div> 
+        <div >
+            <h4 class="card-title py-2 mbr-fonts-style display-5">
+                {{name}}<div id="sensor_chart_dbm_{{id}}">{{signal_dbm}}</div>
+            </h4>
+             <div id="sensor_action_btns_{{id}}" style="display:none;">
+				<button id="sensor_chart_remove_btn_{{id}}" class="btn btn-sm btn-secondary display-4">DELETE</button>
+				<button id="sensor_chart_activation_btn_{{id}}" class="btn btn-sm btn-primary display-5">Deactivate</button>
+             </div>    
+        </div>                 
+    </div>
+{{/sensor_chart_list}}
+            

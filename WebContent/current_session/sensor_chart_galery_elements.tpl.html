@@ -1,31 +1,23 @@
-<div class="card-columns">
+		<div id="sensor_chart_list_card_collumns" class="card-columns">
 {{#sensor_chart_list}}
-            <div class="card p-3 align-center">
-                <div class="wrap">
+            <div id="sensor_chart_card_{{id}}" class="card p-6 align-center">
+                <div class="card-wrapper">
                     <div id="sensor_chart_{{id}}" class="pie_progress progress{{id}}" role="progressbar" data-goal="50">
-                       	<p class="pie_progress__number mbr-fonts-style display-5" ></p>
-                    </div>
-                </div> 
-                <div >
-                    <h3 class="card-title py-2 mbr-fonts-style display-5">
-                        {{name}}<div id="sensor_chart_dbm_{{id}}">{{signal_dbm}}</div>
-                    </h3>
-                </div>                 
-            </div>
-{{/sensor_chart_list}}
-            <div class="card p-3 align-center">
-                <div class="wrap">
-                    <div class="pie_progress progress1" role="progressbar" data-goal="50">
-                        <p class="pie_progress__number mbr-fonts-style display-5"></p>
+                    <div id="sensor_chart_deactivated_overlay_{{id}}" class="mbr-overlay" style="display:none;"></div>
+               	        <p class="pie_progress__number mbr-fonts-style display-5" ></p>
                     </div>
                 </div> 
                 <div class="mbr-crt-title pt-3">
                     <h4 class="card-title py-2 mbr-fonts-style display-5">
-                        Amenity
+                        {{name}}<div id="sensor_chart_dbm_{{id}}">{{signal_dbm}}</div>
                     </h4>
+	                <div id="sensor_action_btns_{{id}}" style="display:none;">
+						<button id="sensor_chart_remove_btn_{{id}}" class="btn btn-sm btn-secondary display-4">DELETE</button>
+						<button id="sensor_chart_activation_btn_{{id}}" class="btn btn-sm btn-primary display-5">Deactivate</button>
+	                </div>    
                 </div>                 
             </div>
-
+{{/sensor_chart_list}}
             <div class="card p-3 align-center">
                 <div >
                     <h3 class="card-title py-2 mbr-fonts-style display-5">
@@ -45,6 +37,4 @@
 		            <button id="config_beacon_btn" class="btn btn-primary">CONNECT</button>
                 </div>                 
             </div>
-
-</div>
-            
+        </div>

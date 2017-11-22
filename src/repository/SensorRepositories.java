@@ -17,7 +17,13 @@ public class SensorRepositories {
     private EntityManager entityManager;
 
 	public List<Sensor> getAllSensor(){
-		return entityManager.createNamedQuery("Sensor.findAll").getResultList();
+		return entityManager.createNamedQuery("Sensor.findAll", Sensor.class).getResultList();
+	}
+
+	public List<Sensor> getForSession(int i_nSessionid){
+		return entityManager.createNamedQuery("Sensor.getForSession", Sensor.class)
+				.setParameter("sessionId", i_nSessionid)
+				.getResultList();
 	}
 
 	public void persist(Sensor sensor ){
@@ -31,4 +37,16 @@ public class SensorRepositories {
 		entityManager.detach(sensor);
 	}
 	
+	public void delete(Sensor sensor ){
+		//entityManager.getTransaction().begin();
+		entityManager.remove(sensor);
+		entityManager.flush();
+		//entityManager.getTransaction().commit();
+	}
+
+	public Sensor getSensor(int i_nSensorId) {
+		return entityManager.createNamedQuery("Sensor.get",Sensor.class)
+				.setParameter("id", i_nSensorId)
+				.getSingleResult();
+	}
 }
