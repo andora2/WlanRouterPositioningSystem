@@ -179,4 +179,12 @@ public class Sensor implements Serializable {
 		return pingspeed;
 	}
 
+	public String getHostname() {
+		return hostname;
+	}
+
+	public void setHostname(String hostname) {
+		this.hostname = hostname;
+	}
+	
 }

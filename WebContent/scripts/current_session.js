@@ -176,15 +176,15 @@ function registerBeaconConfigBtn(){
 		$.ajax({
 		     async: false,
 		     type: 'GET',
-		     //url: 'rest/sensor/add/' + g_currentSession.id + "/" + $("#wifi_ssid").val() + "/" + $("#wifi_pwd").val() + "/" + $("#beacon_name").val() + "/" + geoLocation.lon + "/" + geoLocation.lat,
-		     url: 'rest/sensor/add/' + g_currentSession.id + "/" + "MySSID" + "/" + "MyWifiPWD" + "/" + $("#beacon_name").val() + "/" + geoLocation.lon + "/" + geoLocation.lat,
+		     url: 'rest/sensor/add/' + g_currentSession.id + "/" + $("#wifi_ssid").val() + "/" + $("#wifi_pwd").val() + "/" + $("#beacon_name").val() + "/" + geoLocation.lon + "/" + geoLocation.lat,
+		     //url: 'rest/sensor/add/' + g_currentSession.id + "/" + "MySSID" + "/" + "MyWifiPWD" + "/" + $("#beacon_name").val() + "/" + geoLocation.lon + "/" + geoLocation.lat,
 			 success : function(sensorData) {
 					g_currentSession.sensors.push(sensorData);
-					addSensor(  sensorData.id, //i_id 
-								sensorData.ipaddress, //i_ip 
-								sensorData.name, //i_name
-								50, //x
-								50 //y 
+					addSensor(  sensorData //sensorData.id, //i_id 
+								//sensorData.ipaddress, //i_ip 
+								//sensorData.name, //i_name
+								//50, //x
+								//50 //y 
 							 );
 					addSensorToChartList(sensorData.id, sensorData.name);	
 					registerSensorPosOnGroundPlan();
@@ -206,12 +206,32 @@ function registerSensorPosOnGroundPlan(){
 			var relY = event.pageY - parentOffset.top;
 			var sensor = getSensorFromGlobalListById(g_selectedSensor.sensor_id);
 			if( sensor != null ){
-				sensor.heatmapData.x = Math.trunc(relX);
-				sensor.heatmapData.y = Math.trunc(relY);
+				sensor.heatmapData.x = sensor.sensorDBObj.mapposx = Math.trunc(relX);
+				sensor.heatmapData.y = sensor.sensorDBObj.mapposy = Math.trunc(relY);
+				updateSensorOnDB(sensor.sensorDBObj);				
 			}
 		}
 	});	
 }
+
+function updateSensorOnDB(i_sensor){
+	$.ajax({
+	    url: "rest/sensor/" + i_sensor.id + "/set_groundplan_pos/" + i_sensor.mapposx + "/" + i_sensor.mapposy,
+	    type: 'GET',//'POST',
+	    //data: i_sensor,
+	    async: false,
+	    success: function (sensor) {
+	    	console.log("updated");
+	    },
+	    error: function (data) {
+	    	ajaxError(data)
+	    },
+	    cache: false,
+	    //contentType: false,
+	    //processData: false
+	});
+}
+
 
 function registerSensorSelection(i_sensorId){
 	if( isSet(g_currentSession) && isSet(g_currentSession.id) ){
@@ -616,11 +636,11 @@ function initSensors(i_session){
 		     url: 'rest/sensor/sensors/' + i_session.id,
 			 success : function(sensorList) {
 				 sensorList.forEach( function(sensor, idx, origList) { 
-						addSensor(  sensor.id, //i_id 
-								sensor.ipaddress, //i_ip 
-								sensor.name, //i_name
-								50, //x
-								50 //y
+						addSensor(  sensor //sensor.id, //i_id 
+								//sensor.ipaddress, //i_ip 
+								//sensor.name, //i_name
+								//50, //x
+								//50 //y
 							);
 						registerSensorSelection(sensor.id);
 
@@ -633,14 +653,15 @@ function initSensors(i_session){
 	}
 }
 
-function addSensor(i_id, i_ip, i_name, i_x, i_y){
+function addSensor( i_sensor ){//i_id, i_ip, i_name, i_x, i_y){
 	g_sensorList.push( {
-		id: i_id,
-		ip: i_ip,
-		name: i_name,
+		sensorDBObj: i_sensor,
+		id: i_sensor.id,
+		ip: i_sensor.ipaddress,
+		name: i_sensor.name,
 		heatmapData: {
-			x: i_x,
-			y: i_y,
+			x: isSet(i_sensor.mapposx)? i_sensor.mapposx: 50,
+			y: isSet(i_sensor.mapposy)? i_sensor.mapposy: 50,
 			wifiSignal_dbm: {
 				min: -85,
 				max: -55,
@@ -771,7 +792,9 @@ function refreshWifiSignalValueAsync(i_sensor){
 			error: function(){
 				// if sensor value is not retreivable we lost the connection => asumeing signal loss
 		    	updateSensorChartAndHeatmapRSSIDisplayValue(i_sensor, 
-		    												i_sensor.heatmapData.wifiSignal_dbm.min + 40);
+		    												i_sensor.heatmapData.wifiSignal_dbm.min);
+		    	//updateSensorChartAndHeatmapRSSIDisplayValue(i_sensor, 
+					//	i_sensor.heatmapData.wifiSignal_dbm.min + 10);
 			}
 		});	
 	}

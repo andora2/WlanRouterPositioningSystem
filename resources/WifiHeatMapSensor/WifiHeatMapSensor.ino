@@ -400,9 +400,7 @@ void doGetIPCmd(){
 }
 
 void doIsWRPSSensorCmd(){
- if(WiFi.isConnected()){  
-  Serial.print(F(";IS_WRPS_SENSOR:YES;")); 
- }
+  Serial.print(F(";IS_WRPS_SENSOR:YES:"));Serial.println(F(";")); 
 }
 
 

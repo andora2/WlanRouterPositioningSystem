@@ -25,11 +25,12 @@ public class ArduinoSensor {
 	String strSelectedComPort = "";
 	
 	
-	public String connectToWifi(String i_ssid, String i_pwd, String i_hostname ) {
+	public String connectToWifi(String i_ssid, String i_pwd, String i_hostname ) throws InterruptedException {
 		Arduino myBoard = connectToArduino();
 		if( myBoard != null ){
 			String strCmd = "WIFI_CONNECT_CMD:" + i_ssid + "," + i_pwd + "," + i_hostname + ";\n";
 			myBoard.serialWrite(strCmd);
+			Thread.sleep(1000);
 			try {
 				if( connectionToWifiSucceeded(myBoard, i_ssid) ){
 					return getIp(myBoard);
@@ -77,6 +78,7 @@ public class ArduinoSensor {
 	private boolean isWRPSSensor(Arduino board) throws InterruptedException {
 		String strCmd = "IS_WRPS_SENSOR:;\n";
 		board.serialWrite(strCmd);
+		Thread.sleep(1000);
 		List<String> serialLines = Arrays.asList( board.serialRead().replaceAll("\n", " ").split(";") );
 		int i = 0;
 		while( !serialLines.isEmpty() && i<10){

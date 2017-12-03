@@ -90,7 +90,14 @@ public class SensorMannagementService {
     	final CacheControl cacheControl = new CacheControl();
         cacheControl.setMaxAge((int) TimeUnit.MINUTES.toSeconds(1)); 
 		Response res = Response.serverError().entity("Failed to add new Sensor for given parameters!").cacheControl(cacheControl).build();
-		String resIP = "192.168.100." + (int)(10+(Math.random()*200.0d));//arduinoSensor.connectToWifi(i_ssid, i_pwd, i_name);
+		//String resIP = "192.168.100." + (int)(10+(Math.random()*200.0d));
+		String resIP = "";;
+		try {
+			resIP = arduinoSensor.connectToWifi(i_ssid, i_pwd, i_name);
+		} catch (InterruptedException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		try {
 			//boolean reachble = Inet4Address.getByName(resIP).isReachable(2000);
 			if(!resIP.isEmpty() /*&& Inet4Address.getByName(resIP).isReachable(2000)*/){
@@ -115,7 +122,13 @@ public class SensorMannagementService {
 	@GET
 	@Path( "/connect_to_wifi/{ssid}/{pwd}" )
 	public Response connectToWifi(@PathParam("ssid") String i_ssid, @PathParam("pwd") String i_pwd ) {
-		String resIP = arduinoSensor.connectToWifi(i_ssid, i_pwd,"");
+		String resIP="";
+		try {
+			resIP = arduinoSensor.connectToWifi(i_ssid, i_pwd,"");
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		return !resIP.isEmpty()? Response.ok().build():
 			        Response.serverError().entity("Sensor failed to connect to Wifi!").build();
 	}
@@ -181,4 +194,24 @@ public class SensorMannagementService {
 		return res;
 	}
 
+	@GET
+	@Path( "{sensorid}/set_groundplan_pos/{x}/{y}" )
+	public Response setPosOnGroundPlan( @PathParam("sensorid") int i_sensorId,
+										@PathParam("x") int i_nX,
+										@PathParam("y") int i_nY) {
+		Response res = Response.serverError().entity("Failed to remove Sensor for given parameters!").build();
+		try {
+			Sensor sensor = sensorRepo.getSensor(i_sensorId);
+			sensor.setMapposx(i_nX);
+			sensor.setMapposy(i_nY);
+			sensorRepo.update(sensor);
+			sensorRepo.detach(sensor);
+			res = Response.ok(sensor).build();	
+		} catch (Exception/*IOException*/ e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			res = Response.serverError().entity("Failed to find&update groundplan position for Sensor ('" + i_sensorId + "')" ).build();
+		}
+		return res;
+	}
 }

@@ -49,4 +49,10 @@ public class SensorRepositories {
 				.setParameter("id", i_nSensorId)
 				.getSingleResult();
 	}
+
+	public void update(Sensor i_sensor) {
+		entityManager.merge(i_sensor);
+		entityManager.persist(i_sensor);
+		entityManager.flush();
+	}
 }
